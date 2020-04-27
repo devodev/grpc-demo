@@ -11,7 +11,6 @@ service Fluentd {
 }
 
 message FluentdStartRequest {
-    int32 timeout_sec = 1;
 }
 
 message FluentdStartResponse {
@@ -25,7 +24,6 @@ message FluentdStartResponse {
 }
 
 message FluentdStopRequest {
-    int32 timeout_sec = 1;
 }
 
 message FluentdStopResponse {
@@ -39,7 +37,6 @@ message FluentdStopResponse {
 }
 
 message FluentdRestartRequest {
-    int32 timeout_sec = 1;
 }
 
 message FluentdRestartResponse {

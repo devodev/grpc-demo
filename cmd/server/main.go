@@ -1,27 +1,42 @@
 package main
 
 import (
-	"flag"
-	"log"
-	"net"
+	"fmt"
+	"os"
 
-	"google.golang.org/grpc"
+	"github.com/spf13/cobra"
 )
 
-func main() {
-	var (
-		addr string
-	)
-	flag.StringVar(&addr, "listen", ":9300", "listening address.")
-	flag.Parse()
+var (
+	loggerOutput  = os.Stderr
+	defaultOutput = os.Stdout
+)
 
-	server := grpc.NewServer()
-	fluentdService := FluentdService{}
-	fluentdService.RegisterServer(server)
+// Execute executes the root command.
+func Execute() error {
+	rootCmd := newCommandRoot()
+	return rootCmd.Execute()
+}
 
-	l, err := net.Listen("tcp", addr)
-	if err != nil {
-		log.Fatal(err)
+func writeOut(line string) {
+	fmt.Fprintln(defaultOutput, line)
+}
+
+func newCommandRoot() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "server",
+		Short:   "gRPC server.",
+		Version: "0.1.0",
 	}
-	log.Fatal(server.Serve(l))
+	cmd.AddCommand(
+		newCommandServe(),
+	)
+	return cmd
+}
+
+func main() {
+	if err := Execute(); err != nil {
+		writeOut(err.Error())
+		os.Exit(1)
+	}
 }
