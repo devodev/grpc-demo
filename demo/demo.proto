@@ -1,9 +1,0 @@
-syntax = "proto3";
-
-option go_package = "github.com/devodev/grpc-demo;grpc_demo";
-
-package demo;
-
-message HelloMessage {
-    string name = 1;
-}
