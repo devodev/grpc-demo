@@ -5,8 +5,9 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"strconv"
 
-	"github.com/devodev/grpc-demo/internal/demo"
+	pb "github.com/devodev/grpc-demo/internal/pb"
 	"google.golang.org/grpc"
 )
 
@@ -25,21 +26,46 @@ func main() {
 	switch cmd {
 	default:
 		log.Fatal("command not supported")
-	case "hello":
-		if flag.NArg() < 2 {
-			log.Fatal("hello command requires a name argument")
+	case "fluentd":
+		if flag.NArg() < 3 {
+			log.Fatal("fluentd command requires a method and timeout argument")
 		}
+		timeoutSec, err := strconv.Atoi(flag.Arg(2))
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		conn, err := grpc.Dial(addr, grpc.WithInsecure())
 		if err != nil {
 			log.Fatal(err)
 		}
-		client := demo.NewHelloServiceClient(conn)
+		client := pb.NewFluentdClient(conn)
 
-		req := &demo.HelloRequest{Name: flag.Arg(1)}
-		resp, err := client.GetHello(context.Background(), req)
-		if err != nil {
-			log.Fatal(err)
+		switch flag.Arg(1) {
+		default:
+			log.Fatal("unsupported method")
+		case "start":
+			req := &pb.FluentdStartRequest{TimeoutSec: int32(timeoutSec)}
+			resp, err := client.Start(context.Background(), req)
+			if err != nil {
+				log.Fatal(err)
+			}
+			fmt.Printf("Start response: %v\n", resp.GetStatus())
+		case "stop":
+			req := &pb.FluentdStopRequest{TimeoutSec: int32(timeoutSec)}
+			resp, err := client.Stop(context.Background(), req)
+			if err != nil {
+				log.Fatal(err)
+			}
+			fmt.Printf("Stop response: %v\n", resp.GetStatus())
+		case "restart":
+			req := &pb.FluentdRestartRequest{TimeoutSec: int32(timeoutSec)}
+			resp, err := client.Restart(context.Background(), req)
+			if err != nil {
+				log.Fatal(err)
+			}
+			fmt.Printf("Restart response: %v\n", resp.GetStatus())
 		}
-		fmt.Printf("GetHello response: %v\n", resp.GetMessage())
+
 	}
 }

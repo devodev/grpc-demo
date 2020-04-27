@@ -1,22 +1,12 @@
 package main
 
 import (
-	"context"
 	"flag"
 	"log"
 	"net"
 
-	"github.com/devodev/grpc-demo/internal/demo"
 	"google.golang.org/grpc"
 )
-
-type helloServiceServer struct {
-}
-
-func (s *helloServiceServer) GetHello(ctx context.Context, payload *demo.HelloRequest) (*demo.HelloResponse, error) {
-	message := "Hello " + payload.GetName()
-	return &demo.HelloResponse{Message: message}, nil
-}
 
 func main() {
 	var (
@@ -26,8 +16,9 @@ func main() {
 	flag.Parse()
 
 	server := grpc.NewServer()
-	helloService := &helloServiceServer{}
-	demo.RegisterHelloServiceServer(server, helloService)
+	fluentdService := FluentdService{}
+	fluentdService.RegisterServer(server)
+
 	l, err := net.Listen("tcp", addr)
 	if err != nil {
 		log.Fatal(err)

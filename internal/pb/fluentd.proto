@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+option go_package = "github.com/devodev/grpc-demo/internal/pb;fluentd";
+
+package pb;
+
+service Fluentd {
+    rpc Start (FluentdStartRequest) returns (FluentdStartResponse);
+    rpc Stop (FluentdStopRequest) returns (FluentdStopResponse);
+    rpc Restart (FluentdRestartRequest) returns (FluentdRestartResponse);
+}
+
+message FluentdStartRequest {
+    int32 timeout_sec = 1;
+}
+
+message FluentdStartResponse {
+    enum StartStatus {
+        START_UNKNOWN = 0;
+        START_NOCHANGE = 1;
+        START_SUCCESS = 2;
+        START_FAILED = 3;
+    }
+    StartStatus status = 1;
+}
+
+message FluentdStopRequest {
+    int32 timeout_sec = 1;
+}
+
+message FluentdStopResponse {
+    enum StopStatus {
+        STOP_UNKNOWN = 0;
+        STOP_NOCHANGE = 1;
+        STOP_SUCCESS = 2;
+        STOP_FAILED = 3;
+    }
+    StopStatus status = 1;
+}
+
+message FluentdRestartRequest {
+    int32 timeout_sec = 1;
+}
+
+message FluentdRestartResponse {
+    enum RestartStatus {
+        RESTART_UNKNOWN = 0;
+        RESTART_SUCCESS = 1;
+        RESTART_FAILED_STARTED = 2;
+        RESTART_FAILED_STOPPED = 3;
+    }
+    RestartStatus status = 1;
+}
