@@ -15,6 +15,9 @@ var (
 // Execute executes the root command.
 func Execute() error {
 	rootCmd := newCommandRoot()
+	rootCmd.AddCommand(
+		newCommandServe(),
+	)
 	return rootCmd.Execute()
 }
 
