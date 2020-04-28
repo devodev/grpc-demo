@@ -34,14 +34,13 @@ func newCommandServe() *cobra.Command {
 		Short: "serve the gRPC server.",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			server := grpc.NewServer()
-			fluentdService := FluentdService{}
-			fluentdService.RegisterServer(server)
-
 			l, err := net.Listen("tcp", config.ListenAddr)
 			if err != nil {
 				return err
 			}
+			server := grpc.NewServer()
+			fluentdService := FluentdService{}
+			fluentdService.RegisterServer(server)
 			return server.Serve(l)
 		},
 	}
