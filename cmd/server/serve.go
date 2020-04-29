@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log"
 	"net/url"
 	"os"
 	"os/signal"
@@ -43,7 +42,6 @@ func newCommandServe() *cobra.Command {
 		Short: "serve the gRPC server.",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-
 			interrupt := make(chan os.Signal, 1)
 			signal.Notify(interrupt, os.Interrupt)
 
@@ -60,14 +58,17 @@ func newCommandServe() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			wsConn, resp, err := websocket.DefaultDialer.DialContext(ctx, u.String(), nil)
+			wsConn, _, err := websocket.DefaultDialer.DialContext(ctx, u.String(), nil)
 			if err != nil {
 				return err
 			}
 			defer wsConn.Close()
-			log.Printf("websocket response: %v", resp)
 
-			wsRwc := &ws.RWC{Conn: wsConn}
+			wsRwc, err := ws.NewRWC(websocket.BinaryMessage, wsConn,
+				ws.WithPingEnabled(), ws.WithPongHandler())
+			if err != nil {
+				return err
+			}
 
 			srvConn, err := yamux.Server(wsRwc, yamux.DefaultConfig())
 			if err != nil {

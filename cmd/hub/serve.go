@@ -58,14 +58,19 @@ func echo(w http.ResponseWriter, r *http.Request) {
 		log.Printf("upgrade: %v", err)
 		return
 	}
-	defer wsConn.Close()
 
-	wsRwc := &ws.RWC{Conn: wsConn}
+	wsRwc, err := ws.NewRWC(websocket.BinaryMessage, wsConn,
+		ws.WithPingEnabled(), ws.WithPongHandler())
+	if err != nil {
+		log.Println(err)
+		return
+	}
 
 	incomingConn, err := yamux.Client(wsRwc, yamux.DefaultConfig())
 	if err != nil {
-		log.Fatalf("couldn't create yamux %s", err)
+		log.Printf("error creating yamux client: %s", err)
 	}
+	defer incomingConn.Close()
 
 	grpcConn, err := grpc.Dial("websocket",
 		grpc.WithInsecure(),
@@ -87,8 +92,4 @@ func echo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	log.Printf("response: %v", resp)
-	sleepTime := 10 * time.Second
-	log.Printf("echo sleeping for %v sec..", sleepTime)
-	time.Sleep(sleepTime)
-	log.Println("echo exiting!")
 }
