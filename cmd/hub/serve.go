@@ -48,11 +48,13 @@ func newCommandServe() *cobra.Command {
 			quit := make(chan os.Signal, 1)
 			signal.Notify(quit, os.Interrupt)
 
-			hub := NewHub(config.ListenAddr)
-			done := hub.Start(quit)
+			logger := log.New(os.Stderr, "hub: ", log.LstdFlags)
+
+			hub := NewHub(config.ListenAddr, logger)
+			done := hub.StartWeb(quit)
 
 			<-done
-			log.Println("hub stopped")
+			logger.Println("stopped")
 			return nil
 		},
 	}
@@ -75,56 +77,70 @@ type Hub struct {
 	// Unregister requests from clients.
 	unregister chan *Client
 
+	logger *log.Logger
 	server *http.Server
 }
 
 // NewHub .
-func NewHub(addr string) *Hub {
+func NewHub(addr string, l *log.Logger) *Hub {
+	if l == nil {
+		l = log.New(os.Stderr, "hub: ", log.LstdFlags)
+	}
 	h := &Hub{
 		clients:    make(map[uint64]*Client),
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
+		logger:     l,
 	}
 	router := http.NewServeMux()
+	router.HandleFunc("/", h.httpHandler())
 	router.HandleFunc("/ws", h.wsHandler())
-	server := &http.Server{
+	h.server = &http.Server{
 		Addr:         addr,
 		Handler:      router,
-		ErrorLog:     nil,
+		ErrorLog:     h.logger,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 		IdleTimeout:  15 * time.Second,
 	}
-	h.server = server
 	return h
 }
 
-// Start is a long running goroutine.
-func (h *Hub) Start(quit chan os.Signal) <-chan struct{} {
+// StartWeb is a long running goroutine.
+func (h *Hub) StartWeb(quit chan os.Signal) <-chan struct{} {
 	done := make(chan struct{})
 
 	go func() {
 		<-quit
 
-		log.Println("hub is shutting down...")
+		h.logger.Println("hub is shutting down...")
 
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
 
 		h.server.SetKeepAlivesEnabled(false)
 		if err := h.server.Shutdown(ctx); err != nil {
-			log.Printf("error during server shutdown: %v", err)
+			h.logger.Printf("error during server shutdown: %v", err)
 		}
 		close(done)
 	}()
 
 	go func() {
-		log.Printf("listening on: %v", h.server.Addr)
+		h.logger.Printf("listening on: %v", h.server.Addr)
 		if err := h.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Printf("listen error: %v", err)
+			h.logger.Printf("listen error: %v", err)
 		}
 	}()
 	return done
+}
+
+func (h *Hub) httpHandler() func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "GET" {
+			http.Error(w, "unsupported method", http.StatusMethodNotAllowed)
+			return
+		}
+	}
 }
 
 func (h *Hub) wsHandler() func(w http.ResponseWriter, r *http.Request) {
@@ -132,7 +148,7 @@ func (h *Hub) wsHandler() func(w http.ResponseWriter, r *http.Request) {
 		upgrader := websocket.Upgrader{}
 		wsConn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
-			log.Printf("upgrade: %v", err)
+			h.logger.Printf("upgrade: %v", err)
 			return
 		}
 		go h.handleGrpc(wsConn)
@@ -143,14 +159,14 @@ func (h *Hub) handleGrpc(conn *websocket.Conn) {
 	// wrap websocket conn into ReadWriteCloser
 	wsRwc, err := ws.NewRWC(websocket.BinaryMessage, conn)
 	if err != nil {
-		log.Println(err)
+		h.logger.Println(err)
 		return
 	}
 
 	// manage ReadWriteClose using yamux client
 	incomingConn, err := yamux.Client(wsRwc, yamux.DefaultConfig())
 	if err != nil {
-		log.Printf("error creating yamux client: %s", err)
+		h.logger.Printf("error creating yamux client: %s", err)
 	}
 	defer incomingConn.Close()
 
@@ -162,7 +178,7 @@ func (h *Hub) handleGrpc(conn *websocket.Conn) {
 		}),
 	)
 	if err != nil {
-		log.Printf("error calling grpc.Dial: %v", err)
+		h.logger.Printf("error calling grpc.Dial: %v", err)
 		return
 	}
 
@@ -173,21 +189,17 @@ func (h *Hub) handleGrpc(conn *websocket.Conn) {
 	for {
 		select {
 		case <-incomingConn.CloseChan():
-			log.Println("connecton closed")
+			h.logger.Println("connecton closed")
 			return
 		case <-ticker.C:
-			log.Println("calling fluentdClient.Start on remote server")
+			h.logger.Println("calling fluentdClient.Start on remote server")
 			req := pb.FluentdStartRequest{}
 			resp, err := fluentdClient.Start(context.TODO(), &req)
 			if err != nil {
-				log.Printf("error calling fluentdClient.Start: %v", err)
-
-				log.Printf("grpcConn.GetState: %v", grpcConn.GetState())
-				log.Printf("incomingConn.IsClosed: %v", incomingConn.IsClosed())
-
+				h.logger.Printf("error calling fluentdClient.Start: %v", err)
 				return
 			}
-			log.Printf("response: %v", resp)
+			h.logger.Printf("response: %v", resp)
 		}
 	}
 }
