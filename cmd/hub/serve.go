@@ -45,34 +45,14 @@ func newCommandServe() *cobra.Command {
 		Short: "serve the gRPC hub.",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			server := NewServer(config.ListenAddr)
-
-			done := make(chan struct{})
 			quit := make(chan os.Signal, 1)
 			signal.Notify(quit, os.Interrupt)
 
-			go func() {
-				<-quit
-
-				log.Println("server is shutting down...")
-
-				ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-				defer cancel()
-
-				server.SetKeepAlivesEnabled(false)
-				if err := server.Shutdown(ctx); err != nil {
-					log.Printf("error during server shutdown: %v", err)
-				}
-				close(done)
-			}()
-
-			log.Printf("listening on: %v", server.Addr)
-			if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-				log.Printf("listen error: %v", err)
-			}
+			hub := NewHub(config.ListenAddr)
+			done := hub.Start(quit)
 
 			<-done
-			log.Println("server stopped")
+			log.Println("hub stopped")
 			return nil
 		},
 	}
@@ -80,11 +60,33 @@ func newCommandServe() *cobra.Command {
 	return cmd
 }
 
-// NewServer .
-func NewServer(addr string) *http.Server {
-	hub := &Hub{}
+// Client .
+type Client struct {
+}
+
+// Hub .
+type Hub struct {
+	// used to generate client ids
+	counter uint64
+	// Registered clients.
+	clients map[uint64]*Client
+	// Register requests from the clients.
+	register chan *Client
+	// Unregister requests from clients.
+	unregister chan *Client
+
+	server *http.Server
+}
+
+// NewHub .
+func NewHub(addr string) *Hub {
+	h := &Hub{
+		clients:    make(map[uint64]*Client),
+		register:   make(chan *Client),
+		unregister: make(chan *Client),
+	}
 	router := http.NewServeMux()
-	router.Handle("/ws", hub)
+	router.HandleFunc("/ws", h.wsHandler())
 	server := &http.Server{
 		Addr:         addr,
 		Handler:      router,
@@ -93,21 +95,48 @@ func NewServer(addr string) *http.Server {
 		WriteTimeout: 10 * time.Second,
 		IdleTimeout:  15 * time.Second,
 	}
-	return server
+	h.server = server
+	return h
 }
 
-// Hub .
-type Hub struct {
+// Start is a long running goroutine.
+func (h *Hub) Start(quit chan os.Signal) <-chan struct{} {
+	done := make(chan struct{})
+
+	go func() {
+		<-quit
+
+		log.Println("hub is shutting down...")
+
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+
+		h.server.SetKeepAlivesEnabled(false)
+		if err := h.server.Shutdown(ctx); err != nil {
+			log.Printf("error during server shutdown: %v", err)
+		}
+		close(done)
+	}()
+
+	go func() {
+		log.Printf("listening on: %v", h.server.Addr)
+		if err := h.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Printf("listen error: %v", err)
+		}
+	}()
+	return done
 }
 
-func (h *Hub) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	upgrader := websocket.Upgrader{}
-	wsConn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Printf("upgrade: %v", err)
-		return
+func (h *Hub) wsHandler() func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		upgrader := websocket.Upgrader{}
+		wsConn, err := upgrader.Upgrade(w, r, nil)
+		if err != nil {
+			log.Printf("upgrade: %v", err)
+			return
+		}
+		go h.handleGrpc(wsConn)
 	}
-	go h.handleGrpc(wsConn)
 }
 
 func (h *Hub) handleGrpc(conn *websocket.Conn) {
