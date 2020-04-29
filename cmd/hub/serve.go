@@ -5,6 +5,8 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"os"
+	"os/signal"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -43,8 +45,43 @@ func newCommandServe() *cobra.Command {
 		Short: "serve the gRPC hub.",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			http.HandleFunc("/ws", echo)
-			return http.ListenAndServe(config.ListenAddr, nil)
+			router := http.NewServeMux()
+			router.HandleFunc("/ws", echo)
+			server := &http.Server{
+				Addr:         config.ListenAddr,
+				Handler:      router,
+				ErrorLog:     nil,
+				ReadTimeout:  5 * time.Second,
+				WriteTimeout: 10 * time.Second,
+				IdleTimeout:  15 * time.Second,
+			}
+			done := make(chan struct{})
+			quit := make(chan os.Signal, 1)
+			signal.Notify(quit, os.Interrupt)
+
+			go func() {
+				<-quit
+
+				log.Println("server is shutting down...")
+
+				ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+				defer cancel()
+
+				server.SetKeepAlivesEnabled(false)
+				if err := server.Shutdown(ctx); err != nil {
+					log.Printf("error during server shutdown: %v", err)
+				}
+				close(done)
+			}()
+
+			log.Printf("listening on: %v", server.Addr)
+			if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+				log.Printf("listen error: %v", err)
+			}
+
+			<-done
+			log.Println("server stopped")
+			return nil
 		},
 	}
 	config.AddFlags(cmd.Flags())
@@ -52,6 +89,7 @@ func newCommandServe() *cobra.Command {
 }
 
 func echo(w http.ResponseWriter, r *http.Request) {
+	// upgrade to websocket
 	upgrader := websocket.Upgrader{}
 	wsConn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -59,19 +97,21 @@ func echo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	wsRwc, err := ws.NewRWC(websocket.BinaryMessage, wsConn,
-		ws.WithPingEnabled(), ws.WithPongHandler())
+	// wrap websocket conn into ReadWriteCloser
+	wsRwc, err := ws.NewRWC(websocket.BinaryMessage, wsConn)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
+	// manage ReadWriteClose using yamux client
 	incomingConn, err := yamux.Client(wsRwc, yamux.DefaultConfig())
 	if err != nil {
 		log.Printf("error creating yamux client: %s", err)
 	}
 	defer incomingConn.Close()
 
+	// use yamux client as Dialer to grpc
 	grpcConn, err := grpc.Dial("websocket",
 		grpc.WithInsecure(),
 		grpc.WithDialer(func(s string, d time.Duration) (net.Conn, error) {
@@ -85,11 +125,26 @@ func echo(w http.ResponseWriter, r *http.Request) {
 
 	fluentdClient := pb.NewFluentdClient(grpcConn)
 
-	req := pb.FluentdStartRequest{}
-	resp, err := fluentdClient.Start(context.TODO(), &req)
-	if err != nil {
-		log.Printf("error calling fluentdClient.Start: %v", err)
-		return
+	ticker := time.NewTicker(1 * time.Second)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-incomingConn.CloseChan():
+			log.Println("connecton closed")
+			return
+		case <-ticker.C:
+			log.Println("calling fluentdClient.Start on remote server")
+			req := pb.FluentdStartRequest{}
+			resp, err := fluentdClient.Start(context.TODO(), &req)
+			if err != nil {
+				log.Printf("error calling fluentdClient.Start: %v", err)
+
+				log.Printf("grpcConn.GetState: %v", grpcConn.GetState())
+				log.Printf("incomingConn.IsClosed: %v", incomingConn.IsClosed())
+
+				return
+			}
+			log.Printf("response: %v", resp)
+		}
 	}
-	log.Printf("response: %v", resp)
 }

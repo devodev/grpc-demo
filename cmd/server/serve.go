@@ -1,7 +1,7 @@
 package main
 
 import (
-	"context"
+	"log"
 	"net/url"
 	"os"
 	"os/signal"
@@ -45,27 +45,16 @@ func newCommandServe() *cobra.Command {
 			interrupt := make(chan os.Signal, 1)
 			signal.Notify(interrupt, os.Interrupt)
 
-			ctx, cancel := context.WithCancel(context.Background())
-
-			go func() {
-				defer cancel()
-				select {
-				case <-interrupt:
-				}
-			}()
-
 			u, err := url.Parse(config.HubAddr)
 			if err != nil {
 				return err
 			}
-			wsConn, _, err := websocket.DefaultDialer.DialContext(ctx, u.String(), nil)
+			wsConn, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
 			if err != nil {
 				return err
 			}
-			defer wsConn.Close()
 
-			wsRwc, err := ws.NewRWC(websocket.BinaryMessage, wsConn,
-				ws.WithPingEnabled(), ws.WithPongHandler())
+			wsRwc, err := ws.NewRWC(websocket.BinaryMessage, wsConn)
 			if err != nil {
 				return err
 			}
@@ -78,7 +67,22 @@ func newCommandServe() *cobra.Command {
 			server := grpc.NewServer()
 			fluentdService := &api.FluentdService{}
 			fluentdService.RegisterServer(server)
-			return server.Serve(srvConn)
+
+			go func() {
+				defer func() {
+					log.Println("graceful shutdown..")
+					server.GracefulStop()
+				}()
+				select {
+				case <-interrupt:
+				}
+			}()
+
+			if err := server.Serve(srvConn); err != nil && err != grpc.ErrServerStopped {
+				log.Fatal(err)
+				return err
+			}
+			return nil
 		},
 	}
 	config.AddFlags(cmd.Flags())

@@ -23,30 +23,34 @@ var (
 	maxMessageSize = int64(512)
 )
 
+// PongHandlerFunc .
+type PongHandlerFunc func(appData string) error
+
 // RWC .
 type RWC struct {
-	r          io.Reader
-	pingTicker *time.Ticker
-
+	r  io.Reader
 	mt int
 	c  *websocket.Conn
+
+	pingEnabled     bool
+	pingTicker      *time.Ticker
+	pongHandlerFunc PongHandlerFunc
 }
 
 // RWCOption provide a functional wa of
 type RWCOption func(*RWC)
 
-// WithPingEnabled starts a pinger process.
-func WithPingEnabled() RWCOption {
+// WithPingDisabled disables the ping process.
+func WithPingDisabled() RWCOption {
 	return func(c *RWC) {
-		c.enablePing()
+		c.pingEnabled = false
 	}
 }
 
 //WithPongHandler sets a pong handler.
-func WithPongHandler() RWCOption {
+func WithPongHandler(f PongHandlerFunc) RWCOption {
 	return func(c *RWC) {
-		c.c.SetReadDeadline(time.Now().Add(pongWait))
-		c.c.SetPongHandler(func(string) error { c.c.SetReadDeadline(time.Now().Add(pongWait)); return nil })
+		c.setPongHandler(f)
 	}
 }
 
@@ -56,11 +60,24 @@ func NewRWC(mt int, conn *websocket.Conn, options ...RWCOption) (*RWC, error) {
 	if mt != websocket.BinaryMessage && mt != websocket.TextMessage {
 		return nil, fmt.Errorf("invalid message type")
 	}
-	rwc := &RWC{mt: mt, c: conn}
+	rwc := &RWC{
+		mt:              mt,
+		c:               conn,
+		pingEnabled:     true,
+		pongHandlerFunc: func(string) error { conn.SetReadDeadline(time.Now().Add(pongWait)); return nil },
+	}
 	for _, opt := range options {
 		opt(rwc)
 	}
+	conn.SetPongHandler(rwc.pongHandlerFunc)
+	if rwc.pingEnabled {
+		rwc.enablePing()
+	}
 	return rwc, nil
+}
+
+func (c *RWC) setPongHandler(f PongHandlerFunc) {
+	c.pongHandlerFunc = f
 }
 
 // Write .
@@ -107,7 +124,7 @@ func (c *RWC) Read(p []byte) (int, error) {
 // Close .
 func (c *RWC) Close() error {
 	c.c.SetWriteDeadline(time.Now().Add(writeWait))
-	c.c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, "close"))
+	c.c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, "closed"))
 	return c.c.Close()
 }
 
@@ -124,6 +141,7 @@ func (c *RWC) enablePing() {
 	go c.ping(done)
 }
 
+// ping is a long running goroutine that sends ping messages.
 func (c *RWC) ping(done chan struct{}) {
 	if done == nil {
 		return
@@ -137,7 +155,9 @@ func (c *RWC) ping(done chan struct{}) {
 		case <-c.pingTicker.C:
 			c.c.SetWriteDeadline(time.Now().Add(writeWait))
 			if err := c.c.WriteMessage(websocket.PingMessage, nil); err != nil {
-				log.Printf("error sending ping: %v", err)
+				if websocket.IsUnexpectedCloseError(err, websocket.CloseNormalClosure) {
+					log.Printf("error sending ping: %v", err)
+				}
 				return
 			}
 		}
