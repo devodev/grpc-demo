@@ -45,16 +45,8 @@ func newCommandServe() *cobra.Command {
 		Short: "serve the gRPC hub.",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			router := http.NewServeMux()
-			router.HandleFunc("/ws", echo)
-			server := &http.Server{
-				Addr:         config.ListenAddr,
-				Handler:      router,
-				ErrorLog:     nil,
-				ReadTimeout:  5 * time.Second,
-				WriteTimeout: 10 * time.Second,
-				IdleTimeout:  15 * time.Second,
-			}
+			server := NewServer(config.ListenAddr)
+
 			done := make(chan struct{})
 			quit := make(chan os.Signal, 1)
 			signal.Notify(quit, os.Interrupt)
@@ -88,17 +80,39 @@ func newCommandServe() *cobra.Command {
 	return cmd
 }
 
-func echo(w http.ResponseWriter, r *http.Request) {
-	// upgrade to websocket
+// NewServer .
+func NewServer(addr string) *http.Server {
+	hub := &Hub{}
+	router := http.NewServeMux()
+	router.Handle("/ws", hub)
+	server := &http.Server{
+		Addr:         addr,
+		Handler:      router,
+		ErrorLog:     nil,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		IdleTimeout:  15 * time.Second,
+	}
+	return server
+}
+
+// Hub .
+type Hub struct {
+}
+
+func (h *Hub) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	upgrader := websocket.Upgrader{}
 	wsConn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Printf("upgrade: %v", err)
 		return
 	}
+	go h.handleGrpc(wsConn)
+}
 
+func (h *Hub) handleGrpc(conn *websocket.Conn) {
 	// wrap websocket conn into ReadWriteCloser
-	wsRwc, err := ws.NewRWC(websocket.BinaryMessage, wsConn)
+	wsRwc, err := ws.NewRWC(websocket.BinaryMessage, conn)
 	if err != nil {
 		log.Println(err)
 		return
