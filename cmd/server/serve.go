@@ -1,17 +1,26 @@
 package main
 
 import (
-	"net"
+	"context"
+	"log"
+	"net/url"
+	"os"
+	"os/signal"
 
+	"github.com/gorilla/websocket"
+	"github.com/hashicorp/yamux"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"google.golang.org/grpc"
+
+	"github.com/devodev/grpc-demo/internal/api"
+	"github.com/devodev/grpc-demo/internal/ws"
 )
 
 // ServerConfig holds config for the Fluentd command.
 type ServerConfig struct {
-	ListenAddr string `envconfig:"LISTEN_ADDR" default:":8080"`
+	HubAddr string `envconfig:"HUB_ADDR" default:"ws://localhost:8080/ws"`
 }
 
 // NewServerConfig returns ServerConfig after being processed
@@ -24,7 +33,7 @@ func NewServerConfig() *ServerConfig {
 
 // AddFlags adds flags to the provided flagset.
 func (c *ServerConfig) AddFlags(fs *pflag.FlagSet) {
-	fs.StringVar(&c.ListenAddr, "listen", c.ListenAddr, "listening address.")
+	fs.StringVar(&c.HubAddr, "hub-uri", c.HubAddr, "hub websocket uri.")
 }
 
 func newCommandServe() *cobra.Command {
@@ -34,14 +43,41 @@ func newCommandServe() *cobra.Command {
 		Short: "serve the gRPC server.",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			l, err := net.Listen("tcp", config.ListenAddr)
+
+			interrupt := make(chan os.Signal, 1)
+			signal.Notify(interrupt, os.Interrupt)
+
+			ctx, cancel := context.WithCancel(context.Background())
+
+			go func() {
+				defer cancel()
+				select {
+				case <-interrupt:
+				}
+			}()
+
+			u, err := url.Parse(config.HubAddr)
 			if err != nil {
 				return err
 			}
+			wsConn, resp, err := websocket.DefaultDialer.DialContext(ctx, u.String(), nil)
+			if err != nil {
+				return err
+			}
+			defer wsConn.Close()
+			log.Printf("websocket response: %v", resp)
+
+			wsRwc := &ws.RWC{Conn: wsConn}
+
+			srvConn, err := yamux.Server(wsRwc, yamux.DefaultConfig())
+			if err != nil {
+				return err
+			}
+
 			server := grpc.NewServer()
-			fluentdService := FluentdService{}
+			fluentdService := &api.FluentdService{}
 			fluentdService.RegisterServer(server)
-			return server.Serve(l)
+			return server.Serve(srvConn)
 		},
 	}
 	config.AddFlags(cmd.Flags())

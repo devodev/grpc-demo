@@ -1,12 +1,21 @@
 package main
 
 import (
+	"context"
+	"log"
 	"net"
+	"net/http"
+	"time"
 
+	"github.com/gorilla/websocket"
+	"github.com/hashicorp/yamux"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"google.golang.org/grpc"
+
+	"github.com/devodev/grpc-demo/internal/pb"
+	"github.com/devodev/grpc-demo/internal/ws"
 )
 
 // ServerConfig holds config for the Fluentd command.
@@ -34,14 +43,52 @@ func newCommandServe() *cobra.Command {
 		Short: "serve the gRPC hub.",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			l, err := net.Listen("tcp", config.ListenAddr)
-			if err != nil {
-				return err
-			}
-			server := grpc.NewServer()
-			return server.Serve(l)
+			http.HandleFunc("/ws", echo)
+			return http.ListenAndServe(config.ListenAddr, nil)
 		},
 	}
 	config.AddFlags(cmd.Flags())
 	return cmd
+}
+
+func echo(w http.ResponseWriter, r *http.Request) {
+	upgrader := websocket.Upgrader{}
+	wsConn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Printf("upgrade: %v", err)
+		return
+	}
+	defer wsConn.Close()
+
+	wsRwc := &ws.RWC{Conn: wsConn}
+
+	incomingConn, err := yamux.Client(wsRwc, yamux.DefaultConfig())
+	if err != nil {
+		log.Fatalf("couldn't create yamux %s", err)
+	}
+
+	grpcConn, err := grpc.Dial("websocket",
+		grpc.WithInsecure(),
+		grpc.WithDialer(func(s string, d time.Duration) (net.Conn, error) {
+			return incomingConn.Open()
+		}),
+	)
+	if err != nil {
+		log.Printf("error calling grpc.Dial: %v", err)
+		return
+	}
+
+	fluentdClient := pb.NewFluentdClient(grpcConn)
+
+	req := pb.FluentdStartRequest{}
+	resp, err := fluentdClient.Start(context.TODO(), &req)
+	if err != nil {
+		log.Printf("error calling fluentdClient.Start: %v", err)
+		return
+	}
+	log.Printf("response: %v", resp)
+	sleepTime := 10 * time.Second
+	log.Printf("echo sleeping for %v sec..", sleepTime)
+	time.Sleep(sleepTime)
+	log.Println("echo exiting!")
 }
