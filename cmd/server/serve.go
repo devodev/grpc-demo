@@ -14,7 +14,7 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/devodev/grpc-demo/internal/api"
-	"github.com/devodev/grpc-demo/internal/ws"
+	"github.com/devodev/grpc-demo/internal/hub"
 )
 
 // ServerConfig holds config for the Fluentd command.
@@ -54,7 +54,7 @@ func newCommandServe() *cobra.Command {
 				return err
 			}
 
-			wsRwc, err := ws.NewRWC(websocket.BinaryMessage, wsConn)
+			wsRwc, err := hub.NewRWC(websocket.BinaryMessage, wsConn)
 			if err != nil {
 				return err
 			}
