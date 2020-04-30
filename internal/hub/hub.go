@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"strconv"
@@ -70,6 +71,7 @@ func New(addr string, l *log.Logger) *Hub {
 	router.HandleFunc("/api/list", h.handleListClients)
 	router.HandleFunc("/health", h.handleHealth)
 	router.HandleFunc("/ws", h.handleWS)
+	router.HandleFunc("/", h.handleGRPC)
 	middlewares := []middleware{h.tracingMiddleware, h.loggingMiddleware}
 	h.server = &http.Server{
 		Addr:         addr,
@@ -80,6 +82,7 @@ func New(addr string, l *log.Logger) *Hub {
 		IdleTimeout:  idleTimeout,
 	}
 	go h.listenAndServe()
+	go h.listenAndServeGRPC()
 	return h
 }
 
@@ -89,6 +92,92 @@ func (h *Hub) Close() {
 		close(h.closingCh)
 		<-h.shutdownCh
 	})
+}
+
+func (h *Hub) listenAndServeGRPC() {
+	l, err := net.Listen("tcp", ":9090")
+	if err != nil {
+		log.Printf("could not listen: %v", err)
+		return
+	}
+	defer l.Close()
+	for {
+		conn, err := l.Accept()
+		if err != nil {
+			conn.Close()
+			log.Printf("error on Accept: %v", err)
+			return
+		}
+		log.Println("accepted connection")
+		clientID := uint64(1)
+		client, err := h.registry.get(clientID)
+		if err != nil {
+			conn.Close()
+			log.Printf("error on registry.get: %v", err)
+			return
+		}
+		clientConn, err := client.session.Open()
+		if err != nil {
+			clientConn.Close()
+			conn.Close()
+			log.Printf("error on client.session.Accept: %v", err)
+			return
+		}
+		go func(c1, c2 net.Conn) {
+			defer func() {
+				log.Printf("connection to client %v leaving", clientID)
+				c1.Close()
+				c2.Close()
+			}()
+			log.Printf("connected incoming call to client %v", clientID)
+			Pipe(c1, c2)
+		}(conn, clientConn)
+	}
+}
+
+// This currently is not working since http2 request are only handled
+// on servers using TLS.
+// The server responds with PRI to the client, indicating it tried to handle an HTTP2
+// request using an HTTP/1.1 enabled server.
+func (h *Hub) handleGRPC(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/" {
+		http.NotFound(w, r)
+		return
+	}
+	hj, ok := w.(http.Hijacker)
+	if !ok {
+		http.Error(w, "webserver doesn't support hijacking", http.StatusInternalServerError)
+		return
+	}
+	conn, _, err := hj.Hijack()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	log.Println("accepted connection")
+	clientID := uint64(1)
+	client, err := h.registry.get(clientID)
+	if err != nil {
+		conn.Close()
+		log.Printf("error on registry.get: %v", err)
+		return
+	}
+	clientConn, err := client.session.Open()
+	if err != nil {
+		clientConn.Close()
+		conn.Close()
+		log.Printf("error on client.session.Accept: %v", err)
+		return
+	}
+	go func(c1, c2 net.Conn) {
+		defer func() {
+			log.Printf("connection to client %v leaving", clientID)
+			c1.Close()
+			c2.Close()
+		}()
+		log.Printf("connected incoming call to client %v", clientID)
+		Pipe(c1, c2)
+	}(conn, clientConn)
 }
 
 func (h *Hub) listenAndServe() {
