@@ -34,6 +34,8 @@ func chainMiddlewares(h http.Handler, m ...middleware) http.Handler {
 	return wrapped
 }
 
+type requestIDGenerator func() string
+
 // Hub .
 type Hub struct {
 	healthy int64
@@ -155,12 +157,6 @@ func (h *Hub) healthz(w http.ResponseWriter, req *http.Request) {
 	}
 	w.WriteHeader(http.StatusServiceUnavailable)
 }
-
-type requestIDGenerator func() string
-
-type key int
-
-const requestIDKey key = 0
 
 func (h *Hub) loggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
