@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"sync"
+	"strconv"
 	"sync/atomic"
 	"time"
 
@@ -21,15 +21,29 @@ var (
 	shutdownTimeout = 30 * time.Second
 )
 
+type middleware func(http.Handler) http.Handler
+
+func chainMiddlewares(h http.Handler, m ...middleware) http.Handler {
+	if len(m) < 1 {
+		return h
+	}
+	wrapped := h
+	for i := len(m) - 1; i >= 0; i-- {
+		wrapped = m[i](wrapped)
+	}
+	return wrapped
+}
+
 // Hub .
 type Hub struct {
+	healthy int64
+
 	logger *log.Logger
 	server *http.Server
 
-	counter uint64
+	nextRequestID requestIDGenerator
 
-	mu      *sync.Mutex
-	clients map[uint64]*Client
+	registry *registry
 }
 
 // New .
@@ -38,16 +52,17 @@ func New(addr string, l *log.Logger) *Hub {
 		l = log.New(os.Stderr, "hub: ", log.LstdFlags)
 	}
 	h := &Hub{
-		mu:      &sync.Mutex{},
-		clients: make(map[uint64]*Client),
-		logger:  l,
+		logger:        l,
+		nextRequestID: func() string { return strconv.FormatInt(time.Now().UnixNano(), 36) },
+		registry:      newRegistry(),
 	}
 	router := http.NewServeMux()
-	router.HandleFunc("/api/list", h.handleListClients())
-	router.HandleFunc("/ws", h.wsHandler())
+	router.HandleFunc("/api/list", h.handleListClients)
+	router.HandleFunc("/health", h.healthz)
+	router.HandleFunc("/ws", h.handleWS)
 	h.server = &http.Server{
 		Addr:         addr,
-		Handler:      tracingMiddleware(nextRequestID)(loggingMiddleware(l)(router)),
+		Handler:      chainMiddlewares(router, h.tracingMiddleware, h.loggingMiddleware),
 		ErrorLog:     h.logger,
 		ReadTimeout:  readTimeout,
 		WriteTimeout: writeTimeout,
@@ -63,6 +78,7 @@ func (h *Hub) Start(quit chan os.Signal) <-chan struct{} {
 	go func() {
 		<-quit
 
+		atomic.StoreInt64(&h.healthy, 0)
 		h.logger.Println("hub is shutting down...")
 
 		ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
@@ -76,6 +92,8 @@ func (h *Hub) Start(quit chan os.Signal) <-chan struct{} {
 	}()
 
 	go func() {
+		atomic.StoreInt64(&h.healthy, time.Now().UnixNano())
+
 		h.logger.Printf("listening on: %v", h.server.Addr)
 		if err := h.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			h.logger.Printf("listen error: %v", err)
@@ -84,113 +102,88 @@ func (h *Hub) Start(quit chan os.Signal) <-chan struct{} {
 	return done
 }
 
-func (h *Hub) handleListClients() func(w http.ResponseWriter, r *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != "GET" {
-			http.Error(w, "", http.StatusMethodNotAllowed)
-			return
-		}
-		h.mu.Lock()
-		clientCount := len(h.clients)
-		h.mu.Unlock()
-		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-		w.Header().Set("X-Content-Type-Options", "nosniff")
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, "Number of clients: %+v", clientCount)
+func (h *Hub) handleListClients(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		http.Error(w, "", http.StatusMethodNotAllowed)
+		return
 	}
+	clientCount := h.registry.count()
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintf(w, "Number of clients: %+v", clientCount)
 }
 
-func (h *Hub) wsHandler() func(w http.ResponseWriter, r *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		upgrader := websocket.Upgrader{}
-		wsConn, err := upgrader.Upgrade(w, r, nil)
-		if err != nil {
-			h.logger.Printf("upgrade: %v", err)
-			return
-		}
-		// wrap websocket conn into ReadWriteCloser
-		wsRwc, err := NewRWC(websocket.BinaryMessage, wsConn)
-		if err != nil {
-			h.logger.Println(err)
-			return
-		}
-
-		// manage ReadWriteCloser using yamux client
-		session, err := yamux.Client(wsRwc, yamux.DefaultConfig())
-		if err != nil {
-			h.logger.Printf("error creating yamux client: %s", err)
-			return
-		}
-
-		clientID := h.getID()
-
-		go func() {
-			defer h.unregisterClient(clientID)
-			select {
-			case <-session.CloseChan():
-				h.logger.Printf("client%d: connecton closed", clientID)
-				return
-			}
-		}()
-
-		client := NewClient(clientID, session)
-		h.registerClient(clientID, client)
+func (h *Hub) handleWS(w http.ResponseWriter, r *http.Request) {
+	upgrader := websocket.Upgrader{}
+	wsConn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		h.logger.Printf("upgrade: %v", err)
+		return
 	}
+	// wrap websocket conn into ReadWriteCloser
+	wsRwc, err := NewRWC(websocket.BinaryMessage, wsConn)
+	if err != nil {
+		h.logger.Println(err)
+		return
+	}
+
+	// manage ReadWriteCloser using yamux client
+	session, err := yamux.Client(wsRwc, yamux.DefaultConfig())
+	if err != nil {
+		h.logger.Printf("error creating yamux client: %s", err)
+		return
+	}
+
+	client := newClient(session)
+	clientID := h.registry.registerClient(client)
+
+	go func() {
+		defer h.registry.unregisterClient(clientID)
+		select {
+		case <-session.CloseChan():
+			h.logger.Printf("client%d: connecton closed", clientID)
+			return
+		}
+	}()
 }
 
-func (h *Hub) getID() uint64 {
-	return atomic.AddUint64(&h.counter, 1)
-}
-
-func (h *Hub) registerClient(id uint64, c *Client) {
-	h.mu.Lock()
-	defer h.mu.Unlock()
-	h.clients[id] = c
-}
-
-func (h *Hub) unregisterClient(id uint64) {
-	h.mu.Lock()
-	defer h.mu.Unlock()
-	delete(h.clients, id)
+func (h *Hub) healthz(w http.ResponseWriter, req *http.Request) {
+	if health := atomic.LoadInt64(&h.healthy); health != 0 {
+		fmt.Fprintf(w, "uptime: %s\n", time.Since(time.Unix(0, health)))
+		return
+	}
+	w.WriteHeader(http.StatusServiceUnavailable)
 }
 
 type requestIDGenerator func() string
-
-func nextRequestID() string {
-	return fmt.Sprintf("%d", time.Now().UnixNano())
-}
 
 type key int
 
 const requestIDKey key = 0
 
-func loggingMiddleware(logger *log.Logger) func(http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			defer func() {
-				requestID, ok := r.Context().Value(requestIDKey).(string)
-				if !ok {
-					requestID = "unknown"
-				}
-				logger.Println(requestID, r.Method, r.URL.Path, r.RemoteAddr, r.UserAgent())
-			}()
-			next.ServeHTTP(w, r)
-		})
-	}
+func (h *Hub) loggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			requestID := w.Header().Get("X-Request-Id")
+			if requestID == "" {
+				requestID = "unknown"
+			}
+			h.logger.Println(requestID, r.Method, r.URL.Path, r.RemoteAddr, r.UserAgent())
+		}()
+		next.ServeHTTP(w, r)
+	})
 }
 
-func tracingMiddleware(nextRequestID requestIDGenerator) func(http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			requestID := r.Header.Get("X-Request-Id")
-			if requestID == "" {
-				requestID = nextRequestID()
-			}
-			ctx := context.WithValue(context.Background(), requestIDKey, requestID)
-			w.Header().Set("X-Request-Id", requestID)
-			next.ServeHTTP(w, r.WithContext(ctx))
-		})
-	}
+func (h *Hub) tracingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requestID := r.Header.Get("X-Request-Id")
+		if requestID == "" {
+			requestID = h.nextRequestID()
+		}
+		w.Header().Set("X-Request-Id", requestID)
+		next.ServeHTTP(w, r)
+	})
 }
 
 // func (h *Hub) handleGrpc(conn *websocket.Conn) {
