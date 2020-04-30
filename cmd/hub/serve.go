@@ -43,9 +43,11 @@ func newCommandServe() *cobra.Command {
 			logger := log.New(os.Stderr, "hub: ", log.LstdFlags)
 
 			h := hub.New(config.ListenAddr, logger)
-			done := h.Start(quit)
 
-			<-done
+			select {
+			case <-quit:
+				h.Close()
+			}
 			logger.Println("stopped")
 			return nil
 		},

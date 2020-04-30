@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -46,6 +47,10 @@ type Hub struct {
 	nextRequestID requestIDGenerator
 
 	registry *registry
+
+	once       *sync.Once
+	closingCh  chan struct{}
+	shutdownCh chan struct{}
 }
 
 // New .
@@ -57,28 +62,38 @@ func New(addr string, l *log.Logger) *Hub {
 		logger:        l,
 		nextRequestID: func() string { return strconv.FormatInt(time.Now().UnixNano(), 36) },
 		registry:      newRegistry(),
+		once:          &sync.Once{},
+		closingCh:     make(chan struct{}),
+		shutdownCh:    make(chan struct{}),
 	}
 	router := http.NewServeMux()
 	router.HandleFunc("/api/list", h.handleListClients)
-	router.HandleFunc("/health", h.healthz)
+	router.HandleFunc("/health", h.handleHealth)
 	router.HandleFunc("/ws", h.handleWS)
+	middlewares := []middleware{h.tracingMiddleware, h.loggingMiddleware}
 	h.server = &http.Server{
 		Addr:         addr,
-		Handler:      chainMiddlewares(router, h.tracingMiddleware, h.loggingMiddleware),
+		Handler:      chainMiddlewares(router, middlewares...),
 		ErrorLog:     h.logger,
 		ReadTimeout:  readTimeout,
 		WriteTimeout: writeTimeout,
 		IdleTimeout:  idleTimeout,
 	}
+	go h.listenAndServe()
 	return h
 }
 
-// Start is a long running goroutine.
-func (h *Hub) Start(quit chan os.Signal) <-chan struct{} {
-	done := make(chan struct{})
+// Close .
+func (h *Hub) Close() {
+	h.once.Do(func() {
+		close(h.closingCh)
+		<-h.shutdownCh
+	})
+}
 
+func (h *Hub) listenAndServe() {
 	go func() {
-		<-quit
+		<-h.closingCh
 
 		atomic.StoreInt64(&h.healthy, 0)
 		h.logger.Println("hub is shutting down...")
@@ -90,18 +105,15 @@ func (h *Hub) Start(quit chan os.Signal) <-chan struct{} {
 		if err := h.server.Shutdown(ctx); err != nil {
 			h.logger.Printf("error during server shutdown: %v", err)
 		}
-		close(done)
+		close(h.shutdownCh)
 	}()
 
-	go func() {
-		atomic.StoreInt64(&h.healthy, time.Now().UnixNano())
+	atomic.StoreInt64(&h.healthy, time.Now().UnixNano())
 
-		h.logger.Printf("listening on: %v", h.server.Addr)
-		if err := h.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			h.logger.Printf("listen error: %v", err)
-		}
-	}()
-	return done
+	h.logger.Printf("listening on: %v", h.server.Addr)
+	if err := h.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		h.logger.Printf("listen error: %v", err)
+	}
 }
 
 func (h *Hub) handleListClients(w http.ResponseWriter, r *http.Request) {
@@ -150,7 +162,7 @@ func (h *Hub) handleWS(w http.ResponseWriter, r *http.Request) {
 	}()
 }
 
-func (h *Hub) healthz(w http.ResponseWriter, req *http.Request) {
+func (h *Hub) handleHealth(w http.ResponseWriter, req *http.Request) {
 	if health := atomic.LoadInt64(&h.healthy); health != 0 {
 		fmt.Fprintf(w, "uptime: %s\n", time.Since(time.Unix(0, health)))
 		return
