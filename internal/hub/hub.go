@@ -160,6 +160,38 @@ func (h *Hub) handleWS(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}()
+
+	// grpcConn, err := grpc.Dial("websocket",
+	// 	grpc.WithInsecure(),
+	// 	grpc.WithDialer(func(s string, d time.Duration) (net.Conn, error) {
+	// 		return session.Open()
+	// 	}),
+	// )
+	// if err != nil {
+	// 	h.logger.Printf("error calling grpc.Dial: %v", err)
+	// 	return
+	// }
+
+	// fluentdClient := pb.NewFluentdClient(grpcConn)
+
+	// ticker := time.NewTicker(1 * time.Second)
+	// defer ticker.Stop()
+	// for {
+	// 	select {
+	// 	case <-session.CloseChan():
+	// 		h.logger.Println("connecton closed")
+	// 		return
+	// 	case <-ticker.C:
+	// 		h.logger.Println("calling fluentdClient.Start on remote server")
+	// 		req := pb.FluentdStartRequest{}
+	// 		resp, err := fluentdClient.Start(context.TODO(), &req)
+	// 		if err != nil {
+	// 			h.logger.Printf("error calling fluentdClient.Start: %v", err)
+	// 			return
+	// 		}
+	// 		h.logger.Printf("response: %v", resp)
+	// 	}
+	// }
 }
 
 func (h *Hub) handleHealth(w http.ResponseWriter, req *http.Request) {
@@ -193,52 +225,3 @@ func (h *Hub) tracingMiddleware(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 }
-
-// func (h *Hub) handleGrpc(conn *websocket.Conn) {
-// 	// wrap websocket conn into ReadWriteCloser
-// 	wsRwc, err := ws.NewRWC(websocket.BinaryMessage, conn)
-// 	if err != nil {
-// 		h.logger.Println(err)
-// 		return
-// 	}
-
-// 	// manage ReadWriteClose using yamux client
-// 	incomingConn, err := yamux.Client(wsRwc, yamux.DefaultConfig())
-// 	if err != nil {
-// 		h.logger.Printf("error creating yamux client: %s", err)
-// 	}
-// 	defer incomingConn.Close()
-
-// 	// use yamux client as Dialer to grpc
-// 	grpcConn, err := grpc.Dial("websocket",
-// 		grpc.WithInsecure(),
-// 		grpc.WithDialer(func(s string, d time.Duration) (net.Conn, error) {
-// 			return incomingConn.Open()
-// 		}),
-// 	)
-// 	if err != nil {
-// 		h.logger.Printf("error calling grpc.Dial: %v", err)
-// 		return
-// 	}
-
-// 	fluentdClient := pb.NewFluentdClient(grpcConn)
-
-// 	ticker := time.NewTicker(1 * time.Second)
-// 	defer ticker.Stop()
-// 	for {
-// 		select {
-// 		case <-incomingConn.CloseChan():
-// 			h.logger.Println("connecton closed")
-// 			return
-// 		case <-ticker.C:
-// 			h.logger.Println("calling fluentdClient.Start on remote server")
-// 			req := pb.FluentdStartRequest{}
-// 			resp, err := fluentdClient.Start(context.TODO(), &req)
-// 			if err != nil {
-// 				h.logger.Printf("error calling fluentdClient.Start: %v", err)
-// 				return
-// 			}
-// 			h.logger.Printf("response: %v", resp)
-// 		}
-// 	}
-// }
