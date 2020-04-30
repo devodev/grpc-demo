@@ -1,6 +1,7 @@
 package hub
 
 import (
+	"fmt"
 	"sync"
 	"sync/atomic"
 )
@@ -35,6 +36,16 @@ func (r *registry) unregisterClient(id uint64) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	delete(r.clients, id)
+}
+
+func (r *registry) get(id uint64) (*client, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	c, ok := r.clients[id]
+	if !ok {
+		return nil, fmt.Errorf("not found")
+	}
+	return c, nil
 }
 
 func (r *registry) count() int {
