@@ -83,7 +83,7 @@ func (c *RWC) setPongHandler(f PongHandlerFunc) {
 // Write .
 func (c *RWC) Write(p []byte) (int, error) {
 	c.c.SetWriteDeadline(time.Now().Add(writeWait))
-	err := c.c.WriteMessage(websocket.BinaryMessage, p)
+	err := c.c.WriteMessage(c.mt, p)
 	if err != nil {
 		return 0, err
 	}
