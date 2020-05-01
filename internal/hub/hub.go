@@ -25,9 +25,10 @@ var (
 	defaultShutdownTimeout = 30 * time.Second
 )
 
-type middleware func(http.Handler) http.Handler
+// Middleware is used to decorate an http.Handler.
+type Middleware func(http.Handler) http.Handler
 
-func chainMiddlewares(h http.Handler, m ...middleware) http.Handler {
+func chainMiddlewares(h http.Handler, m ...Middleware) http.Handler {
 	if len(m) < 1 {
 		return h
 	}
@@ -70,6 +71,8 @@ type Config struct {
 	// Registry is used to store clients.
 	Registry ClientRegistry
 
+	// Middlewares are chained and applied on the main server router.
+	Middlewares []Middleware
 	// ReadTimeout is provided to the underlying http server.
 	ReadTimeout time.Duration
 	// WriteTimeout is provided to the underlying http server.
@@ -99,6 +102,10 @@ func New(cfg *Config) *Hub {
 	if registry == nil {
 		registry = NewRegistryMem()
 	}
+	defaultMiddlewares := []Middleware{h.tracingMiddleware, h.loggingMiddleware}
+	if len(cfg.Middlewares) > 0 {
+		defaultMiddlewares = append(defaultMiddlewares, cfg.Middlewares...)
+	}
 
 	h := &Hub{
 		logger:         logger,
@@ -110,14 +117,23 @@ func New(cfg *Config) *Hub {
 	}
 
 	router := http.NewServeMux()
+
+	// This is used solely for demonstration purposes.
+	// Would be better to have a full fledged html page containing
+	// as much metadata about the hub as possible.
 	router.HandleFunc("/api/list", h.handleListClients)
+
+	// non-tested solution to the grpc routing because the current http server
+	// does not have a tlsconfig set, and therefore the http server is started
+	// as a HTTP/1.1 compatible request handler.
+	router.HandleFunc("/", h.handleGRPC)
+
 	router.HandleFunc("/health", h.handleHealth)
 	router.HandleFunc("/ws", h.handleWS)
-	router.HandleFunc("/", h.handleGRPC)
-	middlewares := []middleware{h.tracingMiddleware, h.loggingMiddleware}
+
 	h.server = &http.Server{
 		Addr:         addr,
-		Handler:      chainMiddlewares(router, middlewares...),
+		Handler:      chainMiddlewares(router, defaultMiddlewares...),
 		ErrorLog:     h.logger,
 		ReadTimeout:  defaultReadTimeout,
 		WriteTimeout: defaultWriteTimeout,
@@ -125,6 +141,11 @@ func New(cfg *Config) *Hub {
 	}
 
 	go h.listenAndServe()
+
+	// working solution for the grpc routing but uses raw incoming tcp socket
+	// directly connected to a remote connection using an in-memory Pipe.
+	// This makes it not possible to extract any metadata,
+	// like http headers, to know which remote connection to target.
 	go h.listenAndServeGRPC()
 
 	return h
