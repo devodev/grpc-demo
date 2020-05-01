@@ -52,7 +52,7 @@ type Hub struct {
 
 	nextRequestID RequestIDGenerator
 
-	registry *registry
+	clientRegistry ClientRegistry
 
 	once       *sync.Once
 	closingCh  chan struct{}
@@ -68,6 +68,8 @@ type Config struct {
 	// RequestIDGenerator is used by the Hub registry to generate
 	// new client ids.
 	RequestIDGenerator RequestIDGenerator
+	// Registry is used to store clients.
+	Registry ClientRegistry
 
 	// ReadTimeout is provided to the underlying http server.
 	ReadTimeout time.Duration
@@ -94,14 +96,20 @@ func New(cfg *Config) *Hub {
 	if nextRequestID == nil {
 		nextRequestID = func() string { return strconv.FormatInt(time.Now().UnixNano(), 36) }
 	}
-	h := &Hub{
-		logger:        logger,
-		nextRequestID: nextRequestID,
-		registry:      newRegistry(),
-		once:          &sync.Once{},
-		closingCh:     make(chan struct{}),
-		shutdownCh:    make(chan struct{}),
+	registry := cfg.Registry
+	if registry == nil {
+		registry = NewRegistryMem()
 	}
+
+	h := &Hub{
+		logger:         logger,
+		nextRequestID:  nextRequestID,
+		clientRegistry: registry,
+		once:           &sync.Once{},
+		closingCh:      make(chan struct{}),
+		shutdownCh:     make(chan struct{}),
+	}
+
 	router := http.NewServeMux()
 	router.HandleFunc("/api/list", h.handleListClients)
 	router.HandleFunc("/health", h.handleHealth)
@@ -116,8 +124,10 @@ func New(cfg *Config) *Hub {
 		WriteTimeout: defaultWriteTimeout,
 		IdleTimeout:  defaultIdleTimeout,
 	}
+
 	go h.listenAndServe()
 	go h.listenAndServeGRPC()
+
 	return h
 }
 
@@ -145,7 +155,7 @@ func (h *Hub) listenAndServeGRPC() {
 		}
 		h.logger.Println("accepted connection")
 		clientID := uint64(1)
-		client, err := h.registry.get(clientID)
+		client, err := h.clientRegistry.Get(clientID)
 		if err != nil {
 			conn.Close()
 			h.logger.Printf("error on registry.get: %v", err)
@@ -191,7 +201,7 @@ func (h *Hub) handleGRPC(w http.ResponseWriter, r *http.Request) {
 	}
 	h.logger.Println("accepted connection")
 	clientID := uint64(1)
-	client, err := h.registry.get(clientID)
+	client, err := h.clientRegistry.Get(clientID)
 	if err != nil {
 		conn.Close()
 		h.logger.Printf("error on registry.get: %v", err)
@@ -245,7 +255,7 @@ func (h *Hub) handleListClients(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "", http.StatusMethodNotAllowed)
 		return
 	}
-	clientCount := h.registry.count()
+	clientCount := h.clientRegistry.Count()
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.WriteHeader(http.StatusOK)
@@ -273,11 +283,11 @@ func (h *Hub) handleWS(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	client := newClient(session)
-	clientID := h.registry.registerClient(client)
+	client := NewClient(session)
+	clientID := h.clientRegistry.Register(client)
 
 	go func() {
-		defer h.registry.unregisterClient(clientID)
+		defer h.clientRegistry.Unregister(clientID)
 		select {
 		case <-session.CloseChan():
 			h.logger.Printf("client%d: connecton closed", clientID)

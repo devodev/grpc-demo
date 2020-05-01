@@ -2,12 +2,13 @@ package hub
 
 import "github.com/hashicorp/yamux"
 
-// client .
-type client struct {
+// Client represents a remote gRPC server.
+// The session stored wraps a RWC.
+type Client struct {
 	session *yamux.Session
 }
 
-// newClient .
-func newClient(s *yamux.Session) *client {
-	return &client{session: s}
+// NewClient .
+func NewClient(s *yamux.Session) *Client {
+	return &Client{session: s}
 }
