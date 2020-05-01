@@ -17,10 +17,13 @@ import (
 )
 
 var (
-	readTimeout     = 5 * time.Second
-	writeTimeout    = 10 * time.Second
-	idleTimeout     = 15 * time.Second
-	shutdownTimeout = 30 * time.Second
+	defaultListenAddr = ":8080"
+	defaultLogOutput  = os.Stderr
+
+	defaultReadTimeout     = 5 * time.Second
+	defaultWriteTimeout    = 10 * time.Second
+	defaultIdleTimeout     = 15 * time.Second
+	defaultShutdownTimeout = 30 * time.Second
 )
 
 type middleware func(http.Handler) http.Handler
@@ -36,7 +39,9 @@ func chainMiddlewares(h http.Handler, m ...middleware) http.Handler {
 	return wrapped
 }
 
-type requestIDGenerator func() string
+// RequestIDGenerator is used by the hub registry
+// to generate new client ids.
+type RequestIDGenerator func() string
 
 // Hub .
 type Hub struct {
@@ -45,7 +50,7 @@ type Hub struct {
 	logger *log.Logger
 	server *http.Server
 
-	nextRequestID requestIDGenerator
+	nextRequestID RequestIDGenerator
 
 	registry *registry
 
@@ -54,14 +59,44 @@ type Hub struct {
 	shutdownCh chan struct{}
 }
 
+// Config holds the Hub configuration.
+type Config struct {
+	// ListenAddr is the address on which the server listens.
+	ListenAddr string
+	// Logger is used to provide a custom logger.
+	Logger *log.Logger
+	// RequestIDGenerator is used by the Hub registry to generate
+	// new client ids.
+	RequestIDGenerator RequestIDGenerator
+
+	// ReadTimeout is provided to the underlying http server.
+	ReadTimeout time.Duration
+	// WriteTimeout is provided to the underlying http server.
+	WriteTimeout time.Duration
+	// IdleTimeout is provided to the underlying http server.
+	IdleTimeout time.Duration
+}
+
 // New .
-func New(addr string, l *log.Logger) *Hub {
-	if l == nil {
-		l = log.New(os.Stderr, "hub: ", log.LstdFlags)
+func New(cfg *Config) *Hub {
+	if cfg == nil {
+		cfg = &Config{}
+	}
+	addr := cfg.ListenAddr
+	if addr == "" {
+		addr = defaultListenAddr
+	}
+	logger := cfg.Logger
+	if logger == nil {
+		logger = log.New(defaultLogOutput, "hub: ", log.LstdFlags)
+	}
+	nextRequestID := cfg.RequestIDGenerator
+	if nextRequestID == nil {
+		nextRequestID = func() string { return strconv.FormatInt(time.Now().UnixNano(), 36) }
 	}
 	h := &Hub{
-		logger:        l,
-		nextRequestID: func() string { return strconv.FormatInt(time.Now().UnixNano(), 36) },
+		logger:        logger,
+		nextRequestID: nextRequestID,
 		registry:      newRegistry(),
 		once:          &sync.Once{},
 		closingCh:     make(chan struct{}),
@@ -77,9 +112,9 @@ func New(addr string, l *log.Logger) *Hub {
 		Addr:         addr,
 		Handler:      chainMiddlewares(router, middlewares...),
 		ErrorLog:     h.logger,
-		ReadTimeout:  readTimeout,
-		WriteTimeout: writeTimeout,
-		IdleTimeout:  idleTimeout,
+		ReadTimeout:  defaultReadTimeout,
+		WriteTimeout: defaultWriteTimeout,
+		IdleTimeout:  defaultIdleTimeout,
 	}
 	go h.listenAndServe()
 	go h.listenAndServeGRPC()
@@ -97,7 +132,7 @@ func (h *Hub) Close() {
 func (h *Hub) listenAndServeGRPC() {
 	l, err := net.Listen("tcp", ":9090")
 	if err != nil {
-		log.Printf("could not listen: %v", err)
+		h.logger.Printf("could not listen: %v", err)
 		return
 	}
 	defer l.Close()
@@ -105,31 +140,31 @@ func (h *Hub) listenAndServeGRPC() {
 		conn, err := l.Accept()
 		if err != nil {
 			conn.Close()
-			log.Printf("error on Accept: %v", err)
+			h.logger.Printf("error on Accept: %v", err)
 			return
 		}
-		log.Println("accepted connection")
+		h.logger.Println("accepted connection")
 		clientID := uint64(1)
 		client, err := h.registry.get(clientID)
 		if err != nil {
 			conn.Close()
-			log.Printf("error on registry.get: %v", err)
+			h.logger.Printf("error on registry.get: %v", err)
 			return
 		}
 		clientConn, err := client.session.Open()
 		if err != nil {
 			clientConn.Close()
 			conn.Close()
-			log.Printf("error on client.session.Accept: %v", err)
+			h.logger.Printf("error on client.session.Accept: %v", err)
 			return
 		}
 		go func(c1, c2 net.Conn) {
 			defer func() {
-				log.Printf("connection to client %v leaving", clientID)
+				h.logger.Printf("connection to client %v leaving", clientID)
 				c1.Close()
 				c2.Close()
 			}()
-			log.Printf("connected incoming call to client %v", clientID)
+			h.logger.Printf("connected incoming call to client %v", clientID)
 			Pipe(c1, c2)
 		}(conn, clientConn)
 	}
@@ -154,28 +189,28 @@ func (h *Hub) handleGRPC(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	log.Println("accepted connection")
+	h.logger.Println("accepted connection")
 	clientID := uint64(1)
 	client, err := h.registry.get(clientID)
 	if err != nil {
 		conn.Close()
-		log.Printf("error on registry.get: %v", err)
+		h.logger.Printf("error on registry.get: %v", err)
 		return
 	}
 	clientConn, err := client.session.Open()
 	if err != nil {
 		clientConn.Close()
 		conn.Close()
-		log.Printf("error on client.session.Accept: %v", err)
+		h.logger.Printf("error on client.session.Accept: %v", err)
 		return
 	}
 	go func(c1, c2 net.Conn) {
 		defer func() {
-			log.Printf("connection to client %v leaving", clientID)
+			h.logger.Printf("connection to client %v leaving", clientID)
 			c1.Close()
 			c2.Close()
 		}()
-		log.Printf("connected incoming call to client %v", clientID)
+		h.logger.Printf("connected incoming call to client %v", clientID)
 		Pipe(c1, c2)
 	}(conn, clientConn)
 }
@@ -187,7 +222,7 @@ func (h *Hub) listenAndServe() {
 		atomic.StoreInt64(&h.healthy, 0)
 		h.logger.Println("hub is shutting down...")
 
-		ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
+		ctx, cancel := context.WithTimeout(context.Background(), defaultShutdownTimeout)
 		defer cancel()
 
 		h.server.SetKeepAlivesEnabled(false)

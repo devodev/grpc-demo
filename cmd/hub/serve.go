@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"os"
 	"os/signal"
 
@@ -40,15 +39,13 @@ func newCommandServe() *cobra.Command {
 			quit := make(chan os.Signal, 1)
 			signal.Notify(quit, os.Interrupt)
 
-			logger := log.New(os.Stderr, "hub: ", log.LstdFlags)
-
-			h := hub.New(config.ListenAddr, logger)
+			hubCfg := &hub.Config{ListenAddr: config.ListenAddr}
+			h := hub.New(hubCfg)
 
 			select {
 			case <-quit:
 				h.Close()
 			}
-			logger.Println("stopped")
 			return nil
 		},
 	}
