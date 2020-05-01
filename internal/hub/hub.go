@@ -2,7 +2,10 @@ package hub
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
@@ -46,8 +49,6 @@ type RequestIDGenerator func() string
 
 // Config holds the Hub configuration.
 type Config struct {
-	// ListenAddr is the address on which the server listens.
-	ListenAddr string
 	// Logger is used to provide a custom logger.
 	Logger *log.Logger
 	// RequestIDGenerator is used by the Hub registry to generate
@@ -56,6 +57,10 @@ type Config struct {
 	// Registry is used to store clients.
 	Registry ClientRegistry
 
+	// ListenAddr is the address on which the server listens.
+	ListenAddr string
+	// TLSConfig is provided to the underlying http server.
+	TLSConfig *tls.Config
 	// Middlewares are chained and applied on the main server router.
 	Middlewares []Middleware
 	// ReadTimeout is provided to the underlying http server.
@@ -137,6 +142,7 @@ func New(cfg *Config) *Hub {
 		Addr:         addr,
 		Handler:      chainMiddlewares(router, defaultMiddlewares...),
 		ErrorLog:     h.logger,
+		TLSConfig:    cfg.TLSConfig,
 		ReadTimeout:  defaultReadTimeout,
 		WriteTimeout: defaultWriteTimeout,
 		IdleTimeout:  defaultIdleTimeout,
@@ -267,8 +273,14 @@ func (h *Hub) listenAndServe() {
 	atomic.StoreInt64(&h.healthy, time.Now().UnixNano())
 
 	h.logger.Printf("listening on: %v", h.server.Addr)
-	if err := h.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		h.logger.Printf("listen error: %v", err)
+	if h.server.TLSConfig != nil {
+		if err := h.server.ListenAndServeTLS("", ""); err != nil && err != http.ErrServerClosed {
+			h.logger.Printf("listen error: %v", err)
+		}
+	} else {
+		if err := h.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			h.logger.Printf("listen error: %v", err)
+		}
 	}
 }
 
@@ -377,4 +389,31 @@ func (h *Hub) tracingMiddleware(next http.Handler) http.Handler {
 		w.Header().Set("X-Request-Id", requestID)
 		next.ServeHTTP(w, r)
 	})
+}
+
+// CreateServerTLSConfig creates a tls config using the provided.
+func CreateServerTLSConfig(caPath, certPath, keyPath string) (*tls.Config, error) {
+	tlsConfig := &tls.Config{}
+	tlsConfig.PreferServerCipherSuites = true
+	if caPath != "" {
+		cacert, err := ioutil.ReadFile(caPath)
+		if err != nil {
+			return nil, fmt.Errorf("ca cert: %v", err)
+		}
+		certpool := x509.NewCertPool()
+		certpool.AppendCertsFromPEM(cacert)
+		tlsConfig.RootCAs = certpool
+	}
+	if certPath == "" {
+		return nil, fmt.Errorf("missing cert file")
+	}
+	if keyPath == "" {
+		return nil, fmt.Errorf("missing key file")
+	}
+	pair, err := tls.LoadX509KeyPair(certPath, keyPath)
+	if err != nil {
+		return nil, fmt.Errorf("cert/key: %v", err)
+	}
+	tlsConfig.Certificates = []tls.Certificate{pair}
+	return tlsConfig, nil
 }

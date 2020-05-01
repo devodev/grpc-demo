@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"os"
 	"os/signal"
 
@@ -14,6 +15,10 @@ import (
 // ServerConfig holds config for the Fluentd command.
 type ServerConfig struct {
 	ListenAddr string `envconfig:"LISTEN_ADDR" default:":8080"`
+	TLS        bool   `envconfig:"TLS"`
+	CACertFile string `envconfig:"TLS_CA_CERT_FILE"`
+	CertFile   string `envconfig:"TLS_CERT_FILE"`
+	KeyFile    string `envconfig:"TLS_KEY_FILE"`
 }
 
 // NewServerConfig returns ServerConfig after being processed
@@ -27,6 +32,10 @@ func NewServerConfig() *ServerConfig {
 // AddFlags adds flags to the provided flagset.
 func (c *ServerConfig) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVar(&c.ListenAddr, "listen", c.ListenAddr, "listening address.")
+	fs.BoolVar(&c.TLS, "tls", c.TLS, "enable tls")
+	fs.StringVar(&c.CACertFile, "tls-ca-cert-file", c.CACertFile, "ca certificate file")
+	fs.StringVar(&c.CertFile, "tls-cert-file", c.CertFile, "certificate file")
+	fs.StringVar(&c.KeyFile, "tls-key-file", c.KeyFile, "key file")
 }
 
 func newCommandServe() *cobra.Command {
@@ -39,7 +48,16 @@ func newCommandServe() *cobra.Command {
 			quit := make(chan os.Signal, 1)
 			signal.Notify(quit, os.Interrupt)
 
-			hubCfg := &hub.Config{ListenAddr: config.ListenAddr}
+			tlsConfig := new(tls.Config)
+			if config.TLS {
+				var err error
+				tlsConfig, err = hub.CreateServerTLSConfig(config.CACertFile, config.CertFile, config.KeyFile)
+				if err != nil {
+					return err
+				}
+			}
+
+			hubCfg := &hub.Config{ListenAddr: config.ListenAddr, TLSConfig: tlsConfig}
 			h := hub.New(hubCfg)
 
 			select {
