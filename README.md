@@ -7,6 +7,27 @@ Generate demo protocol buffers and output into demo package
 $ protoc --proto_path=internal/pb --go_out=plugins=grpc:internal/pb --go_opt=paths=source_relative internal/pb/*.proto
 ```
 
+## Development
+Generate cert/key in cwd for hub (test.crt/test.key)
+```
+$ make
+```
+
+Run hub
+```
+$ go run ./cmd/hub serve --tls --tls-cert-file test.crt --tls-key-file test.key
+```
+
+Connect server to hub
+```
+$ go run ./cmd/server serve --tls-insecure-skip-verify --hub-uri wss://localhost:8080/ws
+```
+
+Call grpc service on the server through hub using raw tcp forward
+```
+$ echo '{}' | go run ./cmd/client fluentd start -s localhost:9090
+```
+
 ## Roadmap
 ### Security
 Secure Layer
