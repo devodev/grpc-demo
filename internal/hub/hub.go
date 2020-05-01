@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/hashicorp/yamux"
 )
 
 var (
@@ -276,20 +275,17 @@ func (h *Hub) handleWS(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// manage ReadWriteCloser using yamux client
-	session, err := yamux.Client(wsRwc, yamux.DefaultConfig())
+	client, err := NewClient(wsRwc)
 	if err != nil {
-		h.logger.Printf("error creating yamux client: %s", err)
+		h.logger.Println(err)
 		return
 	}
-
-	client := NewClient(session)
 	clientID := h.clientRegistry.Register(client)
 
 	go func() {
 		defer h.clientRegistry.Unregister(clientID)
 		select {
-		case <-session.CloseChan():
+		case <-client.session.CloseChan():
 			h.logger.Printf("client%d: connecton closed", clientID)
 			return
 		}
