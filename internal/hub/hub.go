@@ -103,10 +103,6 @@ func New(cfg *Config) *Hub {
 	if registry == nil {
 		registry = NewRegistryMem()
 	}
-	defaultMiddlewares := []Middleware{h.tracingMiddleware, h.loggingMiddleware}
-	if len(cfg.Middlewares) > 0 {
-		defaultMiddlewares = append(defaultMiddlewares, cfg.Middlewares...)
-	}
 
 	h := &Hub{
 		logger:         logger,
@@ -115,6 +111,11 @@ func New(cfg *Config) *Hub {
 		once:           &sync.Once{},
 		closingCh:      make(chan struct{}),
 		shutdownCh:     make(chan struct{}),
+	}
+
+	defaultMiddlewares := []Middleware{h.tracingMiddleware, h.loggingMiddleware}
+	if len(cfg.Middlewares) > 0 {
+		defaultMiddlewares = append(defaultMiddlewares, cfg.Middlewares...)
 	}
 
 	router := http.NewServeMux()
