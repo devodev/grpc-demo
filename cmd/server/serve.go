@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"log"
 	"net/url"
 	"os"
@@ -19,7 +20,8 @@ import (
 
 // ServerConfig holds config for the Fluentd command.
 type ServerConfig struct {
-	HubAddr string `envconfig:"HUB_ADDR" default:"ws://localhost:8080/ws"`
+	HubAddr            string `envconfig:"HUB_ADDR" default:"ws://localhost:8080/ws"`
+	InsecureSkipVerify bool   `envconfig:"TLS_INSECURE_SKIP_VERIFY"`
 }
 
 // NewServerConfig returns ServerConfig after being processed
@@ -33,6 +35,7 @@ func NewServerConfig() *ServerConfig {
 // AddFlags adds flags to the provided flagset.
 func (c *ServerConfig) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVar(&c.HubAddr, "hub-uri", c.HubAddr, "hub websocket uri.")
+	fs.BoolVar(&c.InsecureSkipVerify, "tls-insecure-skip-verify", c.InsecureSkipVerify, "INSECURE: skip tls checks")
 }
 
 func newCommandServe() *cobra.Command {
@@ -49,7 +52,11 @@ func newCommandServe() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			wsConn, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
+			dialer := websocket.DefaultDialer
+			if config.InsecureSkipVerify {
+				dialer.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+			}
+			wsConn, _, err := dialer.Dial(u.String(), nil)
 			if err != nil {
 				return err
 			}
