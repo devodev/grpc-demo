@@ -48,7 +48,7 @@ func newCommandServe() *cobra.Command {
 			quit := make(chan os.Signal, 1)
 			signal.Notify(quit, os.Interrupt)
 
-			tlsConfig := new(tls.Config)
+			var tlsConfig *tls.Config
 			if config.TLS {
 				var err error
 				tlsConfig, err = hub.CreateServerTLSConfig(config.CACertFile, config.CertFile, config.KeyFile)
