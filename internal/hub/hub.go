@@ -16,8 +16,9 @@ import (
 )
 
 var (
-	defaultListenAddr = ":8080"
-	defaultLogOutput  = os.Stderr
+	defaultListenAddr         = ":8080"
+	defaultLogOutput          = os.Stderr
+	defaultRequestIDGenerator = func() string { return strconv.FormatInt(time.Now().UnixNano(), 36) }
 
 	defaultReadTimeout     = 5 * time.Second
 	defaultWriteTimeout    = 10 * time.Second
@@ -43,22 +44,6 @@ func chainMiddlewares(h http.Handler, m ...Middleware) http.Handler {
 // to generate new client ids.
 type RequestIDGenerator func() string
 
-// Hub .
-type Hub struct {
-	healthy int64
-
-	logger *log.Logger
-	server *http.Server
-
-	nextRequestID RequestIDGenerator
-
-	clientRegistry ClientRegistry
-
-	once       *sync.Once
-	closingCh  chan struct{}
-	shutdownCh chan struct{}
-}
-
 // Config holds the Hub configuration.
 type Config struct {
 	// ListenAddr is the address on which the server listens.
@@ -81,6 +66,22 @@ type Config struct {
 	IdleTimeout time.Duration
 }
 
+// Hub .
+type Hub struct {
+	healthy int64
+
+	logger *log.Logger
+	server *http.Server
+
+	nextRequestID RequestIDGenerator
+
+	clientRegistry ClientRegistry
+
+	once       *sync.Once
+	closingCh  chan struct{}
+	shutdownCh chan struct{}
+}
+
 // New .
 func New(cfg *Config) *Hub {
 	if cfg == nil {
@@ -96,7 +97,7 @@ func New(cfg *Config) *Hub {
 	}
 	nextRequestID := cfg.RequestIDGenerator
 	if nextRequestID == nil {
-		nextRequestID = func() string { return strconv.FormatInt(time.Now().UnixNano(), 36) }
+		nextRequestID = defaultRequestIDGenerator
 	}
 	registry := cfg.Registry
 	if registry == nil {
