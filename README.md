@@ -5,6 +5,21 @@ Generate protocol buffers
 
 Generate cert/key in cwd for hub (test.crt/test.key)
 ```
+$ make gencert
+$ make readcert
+reading generated cert..
+openssl x509 -text -noout -in test.crt
+Certificate:
+...
+```
+
+Regenerate protocol buffers
+```
+$ make pb
+```
+
+Build all
+```
 $ make
 ```
 

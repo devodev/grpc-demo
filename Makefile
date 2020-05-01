@@ -20,16 +20,16 @@ pb: pb/fluentd.pb.go  ## compile protocol buffers
 dep: ## Get dependencies
 	@go get -v -d ./...
 
-build_setup:
+setup_build:
 	@mkdir -p $(BINARY_LOCATION)
 
-build_hub: build_setup pb dep ## build hub binary
+build_hub: setup_build pb dep ## build hub binary
 	@go build -i -v -o $(BINARY_LOCATION)/hub $(HUB_LOCATION)
 
-build_server: build_setup pb dep ## build server binary
+build_server: setup_build pb dep ## build server binary
 	@go build -i -v -o $(BINARY_LOCATION)/server $(SERVER_LOCATION)
 
-build_client: build_setup pb dep ## build client binary
+build_client: setup_build pb dep ## build client binary
 	@go build -i -v -o $(BINARY_LOCATION)/client $(CLIENT_LOCATION)
 
 clean: ## delete binary folder
