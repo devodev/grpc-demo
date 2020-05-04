@@ -3,7 +3,7 @@ package api
 import (
 	"context"
 
-	pb "github.com/devodev/grpc-demo/internal/pb"
+	pb "github.com/devodev/grpc-demo/internal/pb/external"
 	"google.golang.org/grpc"
 )
 

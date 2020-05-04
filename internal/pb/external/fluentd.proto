@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-option go_package = "github.com/devodev/grpc-demo/internal/pb";
+option go_package = "github.com/devodev/grpc-demo/internal/pb/external";
 
-package pb;
+package external;
 
 service Fluentd {
     rpc Start (FluentdStartRequest) returns (FluentdStartResponse);

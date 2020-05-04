@@ -145,7 +145,7 @@ func (h *Hub) Close() {
 func (h *Hub) listenAndServeGRPC() {
 	director := func(ctx context.Context, fullMethodName string) (context.Context, *grpc.ClientConn, error) {
 		h.logger.Printf("fullMethodName: %v", fullMethodName)
-		if strings.HasPrefix(fullMethodName, "/pb.Fluentd") {
+		if strings.HasPrefix(fullMethodName, "/external.") {
 			client, err := h.clientRegistry.Get(1)
 			if err != nil {
 				return nil, nil, grpc.Errorf(codes.FailedPrecondition, "server not found")

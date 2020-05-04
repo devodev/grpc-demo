@@ -3,8 +3,9 @@ package main
 import (
 	"context"
 
+	pb "github.com/devodev/grpc-demo/internal/pb/external"
+
 	"github.com/devodev/grpc-demo/cmd/client/grpc"
-	pb "github.com/devodev/grpc-demo/internal/pb"
 	"github.com/spf13/cobra"
 )
 

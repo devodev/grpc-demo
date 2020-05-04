@@ -1,21 +1,21 @@
 HUB_LOCATION := ./cmd/hub
 SERVER_LOCATION := ./cmd/server
 CLIENT_LOCATION := ./cmd/client
-PB_LOCATION := ./internal/pb
+PB_LOCATION := ./internal/pb/external
 BINARY_LOCATION := ./bin
 
 .PHONY: all pb dep build_hub build_server build_client clean gencert readcert
 
 all: build_hub build_server build_client
 
-pb/fluentd.pb.go: $(PB_LOCATION)/fluentd.proto
+pb/external/fluentd.pb.go: $(PB_LOCATION)/fluentd.proto
 	@protoc -I $(PB_LOCATION) \
 			-I ${GOPATH}/src \
 			--go_out=plugins=grpc:$(PB_LOCATION) \
 			--go_opt=paths=source_relative \
 			$(PB_LOCATION)/fluentd.proto
 
-pb: pb/fluentd.pb.go  ## compile protocol buffers
+pb: pb/external/fluentd.pb.go  ## compile protocol buffers
 
 dep: ## Get dependencies
 	@go get -v -d ./...
