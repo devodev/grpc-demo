@@ -48,6 +48,8 @@ func newCommandServe() *cobra.Command {
 			quit := make(chan os.Signal, 1)
 			signal.Notify(quit, os.Interrupt)
 
+			// TODO: refactor this using options.
+			// TODO: something like: WithTLS(caPath string, certPath string, keyPath string)
 			var tlsConfig *tls.Config
 			if config.TLS {
 				var err error
