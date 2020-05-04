@@ -6,7 +6,16 @@
   - We cannot reach remote servers first because of NAT/Firewalls. The server needs to initiate the connection first.
 - We need to communicate with these remote servers from the SOCs.
 
-## Current concept
+## Initial Idea
+- Remote servers are plain gRPC server.
+  - Easy to work with.
+  - Easy to update independently.
+  - No dependencies other than gRPC itself.
+- Hub is a proxy between the SOC and remote servers.
+  - Accept incoming connection from remote servers and register them.
+- Client is a CLI that communicates with the Hub using plain gRPC.
+
+## Concept
 - The remote server creates a gRPC server.
 - The remote server then initiates a Websocket connection to a "Hub" server.
 - The remote server does:
@@ -18,7 +27,15 @@
   - Assigns the connection a unique ID and registers it internally.
 - The Hub is now free to use the registered connection as a dialer when making gRPC requests.
 
-## Current implementation
+## Issues
+- I have not been successful trying to reroute gRPC incoming calls to registered connections other than:
+  - Accepting a raw connection on a TCP port and directly connecting both ends with a Pipe to the registered connection.
+
+## Next steps
+- Try to implement a gRPC server on the hub and apply custom handlers returned by a director implementation using grpc-proxy package.
+  - This would let us control incoming calls and create our own handshake protocl using gRPC metadata.
+
+## Implementation
 ![Implementation Diagram 1](assets/img/implementation_diagram_1.png "Implementation Diagram 1")
 ![Implementation Sequence Diagram 1](assets/img/implementation_sequence_diagram_1.png "Implementation Sequence Diagram 1")
 
