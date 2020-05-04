@@ -19,6 +19,8 @@
 - The Hub is now free to use the registered connection as a dialer when maing gRPC requests.
 
 ## Current implementation
+![Implementation Diagram 1](assets/img/implementation_diagram_1.png "Implementation Diagram 1")
+
 ### Server Flow
 - Dial the hub on its websocket listening uri (wss://hub:8080/ws).
 - Upon successful websocket upgrade, it creates a gRPC server, wraps the websocket connection into a raw socket and listens on it.
