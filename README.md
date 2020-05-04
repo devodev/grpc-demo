@@ -20,6 +20,7 @@
 
 ## Current implementation
 ![Implementation Diagram 1](assets/img/implementation_diagram_1.png "Implementation Diagram 1")
+![Implementation Sequence Diagram 1](assets/img/implementation_sequence_diagram_1.png "Implementation Sequence Diagram 1")
 
 ### Server Flow
 - Dial the hub on its websocket listening uri (wss://hub:8080/ws).
