@@ -45,8 +45,6 @@ Local client side
 
 
 ## Development
-Generate protocol buffers
-
 Generate cert/key in cwd for hub (test.crt/test.key)
 ```
 $ make gencert
