@@ -16,7 +16,7 @@
   - Authentication/authorization, etc.
   - Wraps the websocket connection to convert it to a raw socket.
   - Assigns the connection a unique ID and registers it internally.
-- The Hub is now free to use the registered connection as a dialer when maing gRPC requests.
+- The Hub is now free to use the registered connection as a dialer when making gRPC requests.
 
 ## Current implementation
 ![Implementation Diagram 1](assets/img/implementation_diagram_1.png "Implementation Diagram 1")
