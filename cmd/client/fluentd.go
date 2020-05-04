@@ -4,6 +4,7 @@ import (
 	"context"
 
 	pb "github.com/devodev/grpc-demo/internal/pb/external"
+	"google.golang.org/grpc/metadata"
 
 	"github.com/devodev/grpc-demo/cmd/client/grpc"
 	"github.com/spf13/cobra"
@@ -26,10 +27,15 @@ func newCommandFluentdStart() *cobra.Command {
 	dialerCfg := grpc.NewDialerConfig()
 	config := grpc.NewConfig()
 	cmd := &cobra.Command{
-		Use:   "start",
+		Use:   "start [name]",
 		Short: "Start the Fluentd service.",
-		Args:  cobra.NoArgs,
+		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			name := args[0]
+
+			md := metadata.New(map[string]string{"name": name})
+			mdCtx := metadata.NewOutgoingContext(context.Background(), md)
+
 			dialer, err := grpc.NewDialer(dialerCfg)
 			if err != nil {
 				return err
@@ -51,7 +57,7 @@ func newCommandFluentdStart() *cobra.Command {
 				if err != nil {
 					return err
 				}
-				resp, err := fn(context.Background(), &v)
+				resp, err := fn(mdCtx, &v)
 				if err != nil {
 					return err
 				}

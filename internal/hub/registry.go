@@ -24,6 +24,7 @@ func (g *SimpleIDGenerator) GetID() uint64 {
 // ClientRegistry is an interface used to store and retrieve clients.
 type ClientRegistry interface {
 	Get(uint64) (*Client, error)
+	GetWithName(string) (*Client, error)
 	Register(*Client) uint64
 	Unregister(uint64)
 	Count() int
@@ -33,16 +34,18 @@ type ClientRegistry interface {
 type RegistryMem struct {
 	idGenerator IDGenerator
 
-	mu      *sync.Mutex
-	clients map[uint64]*Client
+	mu              *sync.Mutex
+	clients         map[uint64]*Client
+	clientNameIndex map[string]uint64
 }
 
 // NewRegistryMem returns an initialized RegistryMem.
 func NewRegistryMem() *RegistryMem {
 	return &RegistryMem{
-		idGenerator: new(SimpleIDGenerator),
-		mu:          &sync.Mutex{},
-		clients:     make(map[uint64]*Client),
+		idGenerator:     new(SimpleIDGenerator),
+		mu:              &sync.Mutex{},
+		clients:         make(map[uint64]*Client),
+		clientNameIndex: make(map[string]uint64),
 	}
 }
 
@@ -54,15 +57,19 @@ func (r *RegistryMem) Register(c *Client) uint64 {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	r.clients[clientID] = c
+	r.clientNameIndex[c.Name] = clientID
 	return clientID
 }
 
 // Unregister implements the ClientRegistry interface.
 // It removes the client assigned to the provided id.
 func (r *RegistryMem) Unregister(id uint64) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	delete(r.clients, id)
+	if c, ok := r.clients[id]; ok {
+		r.mu.Lock()
+		defer r.mu.Unlock()
+		delete(r.clientNameIndex, c.Name)
+		delete(r.clients, id)
+	}
 }
 
 // Get implements the ClientRegistry interface.
@@ -76,6 +83,17 @@ func (r *RegistryMem) Get(id uint64) (*Client, error) {
 		return nil, fmt.Errorf("not found")
 	}
 	return c, nil
+}
+
+// GetWithName .
+func (r *RegistryMem) GetWithName(name string) (*Client, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	c, ok := r.clientNameIndex[name]
+	if !ok {
+		return nil, fmt.Errorf("client with name: %v not found", name)
+	}
+	return r.clients[c], nil
 }
 
 // Count implements the ClientRegistry interface.

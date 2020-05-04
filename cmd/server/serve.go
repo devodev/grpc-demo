@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/tls"
 	"log"
+	"net/http"
 	"net/url"
 	"os"
 	"os/signal"
@@ -41,10 +42,12 @@ func (c *ServerConfig) AddFlags(fs *pflag.FlagSet) {
 func newCommandServe() *cobra.Command {
 	config := NewServerConfig()
 	cmd := &cobra.Command{
-		Use:   "serve",
+		Use:   "serve [name] [domain]",
 		Short: "serve the gRPC server.",
-		Args:  cobra.NoArgs,
+		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			name := args[0]
+
 			interrupt := make(chan os.Signal, 1)
 			signal.Notify(interrupt, os.Interrupt)
 
@@ -56,18 +59,23 @@ func newCommandServe() *cobra.Command {
 			if config.InsecureSkipVerify {
 				dialer.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 			}
-			wsConn, _, err := dialer.Dial(u.String(), nil)
+
+			header := make(http.Header)
+			header.Add("X-Hub-Meta-Name", name)
+			wsConn, _, err := dialer.Dial(u.String(), header)
 			if err != nil {
 				return err
 			}
 
 			wsRwc, err := hub.NewRWC(websocket.BinaryMessage, wsConn)
 			if err != nil {
+				wsConn.Close()
 				return err
 			}
 
 			srvConn, err := yamux.Server(wsRwc, yamux.DefaultConfig())
 			if err != nil {
+				wsRwc.CloseWithMessage(err.Error())
 				return err
 			}
 

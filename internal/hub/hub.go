@@ -20,6 +20,7 @@ import (
 	"github.com/mwitkow/grpc-proxy/proxy"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 )
 
 var (
@@ -144,11 +145,18 @@ func (h *Hub) Close() {
 
 func (h *Hub) listenAndServeGRPC() {
 	director := func(ctx context.Context, fullMethodName string) (context.Context, *grpc.ClientConn, error) {
-		h.logger.Printf("fullMethodName: %v", fullMethodName)
 		if strings.HasPrefix(fullMethodName, "/external.") {
-			client, err := h.clientRegistry.Get(1)
+			md, ok := metadata.FromIncomingContext(ctx)
+			if !ok {
+				return nil, nil, grpc.Errorf(codes.FailedPrecondition, "no metadata provided")
+			}
+			name, ok := md["name"]
+			if !ok {
+				return nil, nil, grpc.Errorf(codes.FailedPrecondition, "Name not found in metadata")
+			}
+			client, err := h.clientRegistry.GetWithName(name[0])
 			if err != nil {
-				return nil, nil, grpc.Errorf(codes.FailedPrecondition, "server not found")
+				return nil, nil, grpc.Errorf(codes.FailedPrecondition, err.Error())
 			}
 			conn, err := grpc.DialContext(ctx, fullMethodName,
 				grpc.WithCodec(proxy.Codec()),
@@ -252,19 +260,27 @@ func (h *Hub) handleWS(w http.ResponseWriter, r *http.Request) {
 		h.logger.Printf("upgrade: %v", err)
 		return
 	}
+
 	// wrap websocket conn into ReadWriteCloser
 	wsRwc, err := NewRWC(websocket.BinaryMessage, wsConn)
 	if err != nil {
+		wsConn.Close()
 		h.logger.Println(err)
 		return
 	}
 
-	client, err := NewClient(wsRwc)
+	metaName := r.Header.Get("X-Hub-Meta-Name")
+	client, err := NewClient(wsRwc, metaName)
 	if err != nil {
+		wsRwc.CloseWithMessage(err.Error())
 		h.logger.Println(err)
+		if _, ok := err.(*errEmptyAttribute); ok {
+			h.logger.Println("have you set the X-Hub-Meta-* headers?")
+		}
 		return
 	}
 	clientID := h.clientRegistry.Register(client)
+	h.logger.Printf("registered client with name: %v (clientID: %d)", client.Name, clientID)
 
 	go func() {
 		defer h.clientRegistry.Unregister(clientID)
