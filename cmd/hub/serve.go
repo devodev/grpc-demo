@@ -14,11 +14,12 @@ import (
 
 // ServerConfig holds config for the Fluentd command.
 type ServerConfig struct {
-	ListenAddr string `envconfig:"LISTEN_ADDR" default:":8080"`
-	TLS        bool   `envconfig:"TLS"`
-	CACertFile string `envconfig:"TLS_CA_CERT_FILE"`
-	CertFile   string `envconfig:"TLS_CERT_FILE"`
-	KeyFile    string `envconfig:"TLS_KEY_FILE"`
+	HTTPListenAddr string `envconfig:"HTTP_LISTEN_ADDR" default:":8080"`
+	GRPCListenAddr string `envconfig:"GRPC_LISTEN_ADDR" default:":9090"`
+	TLS            bool   `envconfig:"TLS"`
+	CACertFile     string `envconfig:"TLS_CA_CERT_FILE"`
+	CertFile       string `envconfig:"TLS_CERT_FILE"`
+	KeyFile        string `envconfig:"TLS_KEY_FILE"`
 }
 
 // NewServerConfig returns ServerConfig after being processed
@@ -31,7 +32,8 @@ func NewServerConfig() *ServerConfig {
 
 // AddFlags adds flags to the provided flagset.
 func (c *ServerConfig) AddFlags(fs *pflag.FlagSet) {
-	fs.StringVar(&c.ListenAddr, "listen", c.ListenAddr, "listening address.")
+	fs.StringVar(&c.HTTPListenAddr, "http-listen", c.HTTPListenAddr, "HTTP server listening address.")
+	fs.StringVar(&c.GRPCListenAddr, "grpc-listen", c.GRPCListenAddr, "GRPC server listening address.")
 	fs.BoolVar(&c.TLS, "tls", c.TLS, "enable tls")
 	fs.StringVar(&c.CACertFile, "tls-ca-cert-file", c.CACertFile, "ca certificate file")
 	fs.StringVar(&c.CertFile, "tls-cert-file", c.CertFile, "certificate file")
@@ -59,7 +61,11 @@ func newCommandServe() *cobra.Command {
 				}
 			}
 
-			hubCfg := &hub.Config{ListenAddr: config.ListenAddr, TLSConfig: tlsConfig}
+			hubCfg := &hub.Config{
+				HTTPListenAddr: config.HTTPListenAddr,
+				GRPCListenAddr: config.GRPCListenAddr,
+				TLSConfig:      tlsConfig,
+			}
 			h := hub.New(hubCfg)
 
 			select {

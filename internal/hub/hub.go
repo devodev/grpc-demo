@@ -11,15 +11,20 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/mwitkow/grpc-proxy/proxy"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 )
 
 var (
-	defaultListenAddr         = ":8080"
+	defaultHTTPListenAddr     = ":8080"
+	defaultGRPCListenAddr     = ":9090"
 	defaultLogOutput          = os.Stderr
 	defaultRequestIDGenerator = func() string { return strconv.FormatInt(time.Now().UnixNano(), 36) }
 
@@ -51,14 +56,15 @@ type RequestIDGenerator func() string
 type Config struct {
 	// Logger is used to provide a custom logger.
 	Logger *log.Logger
-	// RequestIDGenerator is used by the Hub registry to generate
-	// new client ids.
+	// RequestIDGenerator is used by the tracing middleware.
 	RequestIDGenerator RequestIDGenerator
 	// Registry is used to store clients.
 	Registry ClientRegistry
 
-	// ListenAddr is the address on which the server listens.
-	ListenAddr string
+	// HTTPListenAddr is the address on which the HTTP server listens.
+	HTTPListenAddr string
+	// GRPCListenAddr is the address on which the GRPC server listens.
+	GRPCListenAddr string
 	// TLSConfig is provided to the underlying http server.
 	TLSConfig *tls.Config
 	// Middlewares are chained and applied on the main server router.
@@ -73,8 +79,7 @@ type Config struct {
 
 // Hub .
 type Hub struct {
-	healthy int64
-
+	config *Config
 	logger *log.Logger
 	server *http.Server
 
@@ -92,9 +97,13 @@ func New(cfg *Config) *Hub {
 	if cfg == nil {
 		cfg = &Config{}
 	}
-	addr := cfg.ListenAddr
-	if addr == "" {
-		addr = defaultListenAddr
+	HTTPAddr := cfg.HTTPListenAddr
+	if HTTPAddr == "" {
+		HTTPAddr = defaultHTTPListenAddr
+	}
+	GRPCAddr := cfg.GRPCListenAddr
+	if GRPCAddr == "" {
+		GRPCAddr = defaultGRPCListenAddr
 	}
 	logger := cfg.Logger
 	if logger == nil {
@@ -110,6 +119,7 @@ func New(cfg *Config) *Hub {
 	}
 
 	h := &Hub{
+		config:         cfg,
 		logger:         logger,
 		nextRequestID:  nextRequestID,
 		clientRegistry: registry,
@@ -118,42 +128,7 @@ func New(cfg *Config) *Hub {
 		shutdownCh:     make(chan struct{}),
 	}
 
-	defaultMiddlewares := []Middleware{h.tracingMiddleware, h.loggingMiddleware}
-	if len(cfg.Middlewares) > 0 {
-		defaultMiddlewares = append(defaultMiddlewares, cfg.Middlewares...)
-	}
-
-	router := http.NewServeMux()
-
-	// This is used solely for demonstration purposes.
-	// Would be better to have a full fledged html page containing
-	// as much metadata about the hub as possible.
-	router.HandleFunc("/api/list", h.handleListClients)
-
-	// non-tested solution to the grpc routing because the current http server
-	// does not have a tlsconfig set, and therefore the http server is started
-	// as a HTTP/1.1 compatible request handler.
-	router.HandleFunc("/", h.handleGRPC)
-
-	router.HandleFunc("/health", h.handleHealth)
-	router.HandleFunc("/ws", h.handleWS)
-
-	h.server = &http.Server{
-		Addr:         addr,
-		Handler:      chainMiddlewares(router, defaultMiddlewares...),
-		ErrorLog:     h.logger,
-		TLSConfig:    cfg.TLSConfig,
-		ReadTimeout:  defaultReadTimeout,
-		WriteTimeout: defaultWriteTimeout,
-		IdleTimeout:  defaultIdleTimeout,
-	}
-
 	go h.listenAndServe()
-
-	// working solution for the grpc routing but uses raw incoming tcp socket
-	// directly connected to a remote connection using an in-memory Pipe.
-	// This makes it not possible to extract any metadata,
-	// like http headers, to know which remote connection to target.
 	go h.listenAndServeGRPC()
 
 	return h
@@ -168,97 +143,83 @@ func (h *Hub) Close() {
 }
 
 func (h *Hub) listenAndServeGRPC() {
-	l, err := net.Listen("tcp", ":9090")
-	if err != nil {
-		h.logger.Printf("could not listen: %v", err)
-		return
+	director := func(ctx context.Context, fullMethodName string) (context.Context, *grpc.ClientConn, error) {
+		h.logger.Printf("fullMethodName: %v", fullMethodName)
+		if strings.HasPrefix(fullMethodName, "/pb.Fluentd") {
+			client, err := h.clientRegistry.Get(1)
+			if err != nil {
+				return nil, nil, grpc.Errorf(codes.FailedPrecondition, "server not found")
+			}
+			conn, err := grpc.DialContext(ctx, fullMethodName,
+				grpc.WithCodec(proxy.Codec()),
+				grpc.WithInsecure(),
+				grpc.WithDialer(func(s string, d time.Duration) (net.Conn, error) {
+					return client.session.Open()
+				}),
+			)
+			return ctx, conn, err
+		}
+		return nil, nil, grpc.Errorf(codes.Unimplemented, "Unknown method")
 	}
-	defer l.Close()
-	for {
-		conn, err := l.Accept()
-		if err != nil {
-			conn.Close()
-			h.logger.Printf("error on Accept: %v", err)
-			return
-		}
-		h.logger.Println("accepted connection")
-		clientID := uint64(1)
-		client, err := h.clientRegistry.Get(clientID)
-		if err != nil {
-			conn.Close()
-			h.logger.Printf("error on registry.get: %v", err)
-			return
-		}
-		clientConn, err := client.session.Open()
-		if err != nil {
-			clientConn.Close()
-			conn.Close()
-			h.logger.Printf("error on client.session.Accept: %v", err)
-			return
-		}
-		go func(c1, c2 net.Conn) {
-			defer func() {
-				h.logger.Printf("connection to client %v leaving", clientID)
-				c1.Close()
-				c2.Close()
-			}()
-			h.logger.Printf("connected incoming call to client %v", clientID)
-			Pipe(c1, c2)
-		}(conn, clientConn)
-	}
-}
 
-// This currently is not working since http2 request are only handled
-// on servers using TLS.
-// The server responds with PRI to the client, indicating it tried to handle an HTTP2
-// request using an HTTP/1.1 enabled server.
-func (h *Hub) handleGRPC(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
-		http.NotFound(w, r)
-		return
-	}
-	hj, ok := w.(http.Hijacker)
-	if !ok {
-		http.Error(w, "webserver doesn't support hijacking", http.StatusInternalServerError)
-		return
-	}
-	conn, _, err := hj.Hijack()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	h.logger.Println("accepted connection")
-	clientID := uint64(1)
-	client, err := h.clientRegistry.Get(clientID)
-	if err != nil {
-		conn.Close()
-		h.logger.Printf("error on registry.get: %v", err)
-		return
-	}
-	clientConn, err := client.session.Open()
-	if err != nil {
-		clientConn.Close()
-		conn.Close()
-		h.logger.Printf("error on client.session.Accept: %v", err)
-		return
-	}
-	go func(c1, c2 net.Conn) {
-		defer func() {
-			h.logger.Printf("connection to client %v leaving", clientID)
-			c1.Close()
-			c2.Close()
-		}()
-		h.logger.Printf("connected incoming call to client %v", clientID)
-		Pipe(c1, c2)
-	}(conn, clientConn)
-}
+	server := grpc.NewServer(
+		grpc.CustomCodec(proxy.Codec()),
+		grpc.UnknownServiceHandler(proxy.TransparentHandler(director)),
+	)
 
-func (h *Hub) listenAndServe() {
 	go func() {
 		<-h.closingCh
 
-		atomic.StoreInt64(&h.healthy, 0)
-		h.logger.Println("hub is shutting down...")
+		h.logger.Println("grpc server is shutting down..")
+		server.GracefulStop()
+	}()
+
+	l, err := net.Listen("tcp", h.config.GRPCListenAddr)
+	if err != nil {
+		h.logger.Fatalf("failed to listen: %v", err)
+		return
+	}
+
+	h.logger.Printf("gRPC server listening on: %v", h.config.GRPCListenAddr)
+	if err := server.Serve(l); err != nil && err != grpc.ErrServerStopped {
+		h.logger.Printf("gRPC server listen error: %v", err)
+	}
+}
+
+func (h *Hub) listenAndServe() {
+	var healthy int64
+	handleHealth := func(w http.ResponseWriter, req *http.Request) {
+		if health := atomic.LoadInt64(&healthy); health != 0 {
+			fmt.Fprintf(w, "uptime: %s\n", time.Since(time.Unix(0, health)))
+			return
+		}
+		w.WriteHeader(http.StatusServiceUnavailable)
+	}
+
+	router := http.NewServeMux()
+	router.HandleFunc("/health", handleHealth)
+	router.HandleFunc("/ws", h.handleWS)
+
+	defaultMiddlewares := []Middleware{h.tracingMiddleware, h.loggingMiddleware}
+	if len(h.config.Middlewares) > 0 {
+		defaultMiddlewares = append(defaultMiddlewares, h.config.Middlewares...)
+	}
+
+	h.server = &http.Server{
+		Addr:         h.config.HTTPListenAddr,
+		Handler:      chainMiddlewares(router, defaultMiddlewares...),
+		ErrorLog:     h.logger,
+		TLSConfig:    h.config.TLSConfig,
+		ReadTimeout:  defaultReadTimeout,
+		WriteTimeout: defaultWriteTimeout,
+		IdleTimeout:  defaultIdleTimeout,
+	}
+
+	go func() {
+		<-h.closingCh
+
+		atomic.StoreInt64(&healthy, 0)
+		h.logger.Println("HTTP server is shutting down...")
 
 		ctx, cancel := context.WithTimeout(context.Background(), defaultShutdownTimeout)
 		defer cancel()
@@ -270,30 +231,18 @@ func (h *Hub) listenAndServe() {
 		close(h.shutdownCh)
 	}()
 
-	atomic.StoreInt64(&h.healthy, time.Now().UnixNano())
+	atomic.StoreInt64(&healthy, time.Now().UnixNano())
 
-	h.logger.Printf("listening on: %v", h.server.Addr)
+	h.logger.Printf("HTTP server listening on: %v", h.server.Addr)
 	if h.server.TLSConfig != nil {
 		if err := h.server.ListenAndServeTLS("", ""); err != nil && err != http.ErrServerClosed {
-			h.logger.Printf("listen error: %v", err)
+			h.logger.Printf("HTTP server listen error: %v", err)
 		}
 	} else {
 		if err := h.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			h.logger.Printf("listen error: %v", err)
+			h.logger.Printf("HTTP server listen error: %v", err)
 		}
 	}
-}
-
-func (h *Hub) handleListClients(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "GET" {
-		http.Error(w, "", http.StatusMethodNotAllowed)
-		return
-	}
-	clientCount := h.clientRegistry.Count()
-	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-	w.Header().Set("X-Content-Type-Options", "nosniff")
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "Number of clients: %+v", clientCount)
 }
 
 func (h *Hub) handleWS(w http.ResponseWriter, r *http.Request) {
@@ -325,46 +274,6 @@ func (h *Hub) handleWS(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}()
-
-	// grpcConn, err := grpc.Dial("websocket",
-	// 	grpc.WithInsecure(),
-	// 	grpc.WithDialer(func(s string, d time.Duration) (net.Conn, error) {
-	// 		return session.Open()
-	// 	}),
-	// )
-	// if err != nil {
-	// 	h.logger.Printf("error calling grpc.Dial: %v", err)
-	// 	return
-	// }
-
-	// fluentdClient := pb.NewFluentdClient(grpcConn)
-
-	// ticker := time.NewTicker(1 * time.Second)
-	// defer ticker.Stop()
-	// for {
-	// 	select {
-	// 	case <-session.CloseChan():
-	// 		h.logger.Println("connecton closed")
-	// 		return
-	// 	case <-ticker.C:
-	// 		h.logger.Println("calling fluentdClient.Start on remote server")
-	// 		req := pb.FluentdStartRequest{}
-	// 		resp, err := fluentdClient.Start(context.TODO(), &req)
-	// 		if err != nil {
-	// 			h.logger.Printf("error calling fluentdClient.Start: %v", err)
-	// 			return
-	// 		}
-	// 		h.logger.Printf("response: %v", resp)
-	// 	}
-	// }
-}
-
-func (h *Hub) handleHealth(w http.ResponseWriter, req *http.Request) {
-	if health := atomic.LoadInt64(&h.healthy); health != 0 {
-		fmt.Fprintf(w, "uptime: %s\n", time.Since(time.Unix(0, health)))
-		return
-	}
-	w.WriteHeader(http.StatusServiceUnavailable)
 }
 
 func (h *Hub) loggingMiddleware(next http.Handler) http.Handler {
