@@ -21,6 +21,9 @@ var (
 
 	// Maximum message size allowed from peer.
 	maxMessageSize = int64(512)
+
+	// CloseNormalClosure is the default message sent when close is called.
+	closeNormalClosureMessage = "closed"
 )
 
 // PongHandlerFunc .
@@ -123,8 +126,13 @@ func (c *RWC) Read(p []byte) (int, error) {
 
 // Close .
 func (c *RWC) Close() error {
+	return c.CloseWithMessage(closeNormalClosureMessage)
+}
+
+// CloseWithMessage .
+func (c *RWC) CloseWithMessage(m string) error {
 	c.c.SetWriteDeadline(time.Now().Add(writeWait))
-	c.c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, "closed"))
+	c.c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, m))
 	return c.c.Close()
 }
 
