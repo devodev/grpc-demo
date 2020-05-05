@@ -19,7 +19,7 @@ type Config struct {
 	InsecureSkipVerify bool   `envconfig:"TLS_INSECURE_SKIP_VERIFY"`
 }
 
-// SetupCmd set flags on the provided cmd and resolve env variables using the provided Config.
+// SetupCmd sets flags on the provided cmd and resolve env variables using the provided Config.
 func SetupCmd(cmd *cobra.Command, c *Config) *cobra.Command {
 	envconfig.Process("", c)
 	cmd.Flags().StringVar(&c.HubAddr, "hub-uri", c.HubAddr, "hub websocket uri.")
@@ -74,6 +74,5 @@ func newCommandServe() *cobra.Command {
 			return nil
 		},
 	}
-	cmd = SetupCmd(cmd, &config)
-	return cmd
+	return SetupCmd(cmd, &config)
 }
