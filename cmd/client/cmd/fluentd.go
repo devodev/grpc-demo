@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"context"
@@ -49,6 +49,15 @@ func newCommandFluentdStart() *cobra.Command {
 
 			var v pb.FluentdStartRequest
 			fn := client.Start
+
+			// get encoder and decoder
+
+			// decode request
+
+			// call grpc
+
+			// encode response
+
 			return config.RoundTrip(func(cfg *grpc.Config, in grpc.Decoder, out grpc.Encoder) error {
 				if cfg.PrintSampleRequest {
 					return out.Encode(&v)
