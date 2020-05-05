@@ -41,11 +41,11 @@ func newCommandServe() *cobra.Command {
 			// ? TODO: Could move validation inside Dial()
 			// ? TODO: The use case I see that might be useful is
 			// ? TODO: provide helper methods to set hub specific headers.
-			hubDialer, err := hub.NewDialer(config.HubAddr, config.InsecureSkipVerify, name)
+			hubDialer, err := hub.NewConnector(config.HubAddr, config.InsecureSkipVerify, name)
 			if err != nil {
 				return err
 			}
-			srvConn, err := hubDialer.DialAndWrap()
+			hubListener, err := hubDialer.Listener()
 			if err != nil {
 				return err
 			}
@@ -67,7 +67,7 @@ func newCommandServe() *cobra.Command {
 				}
 			}()
 
-			if err := server.Serve(srvConn); err != nil && err != grpc.ErrServerStopped {
+			if err := server.Serve(hubListener); err != nil && err != grpc.ErrServerStopped {
 				log.Fatal(err)
 				return err
 			}
