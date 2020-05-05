@@ -63,7 +63,7 @@ func makeTLSConfig(caPath, certPath, keyPath string) (*tls.Config, error) {
 }
 
 func newCommandServe() *cobra.Command {
-	var cfg *serverConfig
+	var cfg serverConfig
 	cmd := &cobra.Command{
 		Use:   "serve",
 		Short: "serve the gRPC hub.",
@@ -72,23 +72,22 @@ func newCommandServe() *cobra.Command {
 			quit := make(chan os.Signal, 1)
 			signal.Notify(quit, os.Interrupt)
 
-			// TODO: refactor this using options.
-			// TODO: something like: WithTLS(caPath string, certPath string, keyPath string)
-			var tlsConfig *tls.Config
+			hubOpts := []hub.Option{
+				hub.WithHTTPListenAddr(cfg.HTTPListenAddr),
+				hub.WithGRPCListenAddr(cfg.GRPCListenAddr),
+			}
 			if cfg.TLS {
-				var err error
-				tlsConfig, err = makeTLSConfig(cfg.CACertFile, cfg.CertFile, cfg.KeyFile)
+				tlsConfig, err := makeTLSConfig(cfg.CACertFile, cfg.CertFile, cfg.KeyFile)
 				if err != nil {
 					return err
 				}
+				hubOpts = append(hubOpts, hub.WithTLSConfig(tlsConfig))
 			}
 
-			hubCfg := &hub.Config{
-				HTTPListenAddr: cfg.HTTPListenAddr,
-				GRPCListenAddr: cfg.GRPCListenAddr,
-				TLSConfig:      tlsConfig,
+			h, err := hub.New(hubOpts...)
+			if err != nil {
+				return err
 			}
-			h := hub.New(hubCfg)
 
 			select {
 			case <-quit:
@@ -97,5 +96,5 @@ func newCommandServe() *cobra.Command {
 			return nil
 		},
 	}
-	return setupCmd(cmd, cfg)
+	return setupCmd(cmd, &cfg)
 }

@@ -25,14 +25,16 @@ import (
 )
 
 var (
-	defaultHTTPListenAddr     = ":8080"
-	defaultGRPCListenAddr     = ":9090"
-	defaultLogOutput          = os.Stderr
-	defaultRequestIDGenerator = func() string { return strconv.FormatInt(time.Now().UnixNano(), 36) }
+	defaultGRPCListenAddr = ":9090"
 
-	defaultReadTimeout     = 5 * time.Second
-	defaultWriteTimeout    = 10 * time.Second
-	defaultIdleTimeout     = 15 * time.Second
+	defaultHTTPListenAddr   = ":8080"
+	defaultHTTPReadTimeout  = 5 * time.Second
+	defaultHTTPWriteTimeout = 10 * time.Second
+	defaultHTTPIdleTimeout  = 15 * time.Second
+
+	defaultLogOutput = os.Stderr
+	defaultLogger    = log.New(defaultLogOutput, "hub: ", log.LstdFlags)
+
 	defaultShutdownTimeout = 30 * time.Second
 )
 
@@ -50,44 +52,89 @@ func chainMiddlewares(h http.Handler, m ...Middleware) http.Handler {
 	return wrapped
 }
 
-// RequestIDGenerator is used by the hub registry
-// to generate new client ids.
-type RequestIDGenerator func() string
+// Option provide a way to configure the Hub.
+type Option func(*Hub) error
 
-// Config holds the Hub configuration.
-type Config struct {
-	// Logger is used to provide a custom logger.
-	Logger *log.Logger
-	// RequestIDGenerator is used by the tracing middleware.
-	RequestIDGenerator RequestIDGenerator
-	// Registry is used to store clients.
-	Registry client.Registry
-
-	// HTTPListenAddr is the address on which the HTTP server listens.
-	HTTPListenAddr string
-	// GRPCListenAddr is the address on which the GRPC server listens.
-	GRPCListenAddr string
-	// TLSConfig is provided to the underlying http server.
-	TLSConfig *tls.Config
-	// Middlewares are chained and applied on the main server router.
-	Middlewares []Middleware
-	// ReadTimeout is provided to the underlying http server.
-	ReadTimeout time.Duration
-	// WriteTimeout is provided to the underlying http server.
-	WriteTimeout time.Duration
-	// IdleTimeout is provided to the underlying http server.
-	IdleTimeout time.Duration
+// WithHTTPListenAddr sets the listening address of the HTTP server.
+func WithHTTPListenAddr(a string) Option {
+	return func(h *Hub) error {
+		h.httpListenAddr = a
+		return nil
+	}
 }
 
-// Hub .
+// WithGRPCListenAddr sets the listening address of the gRPC server.
+func WithGRPCListenAddr(a string) Option {
+	return func(h *Hub) error {
+		h.grpcListenAddr = a
+		return nil
+	}
+}
+
+// WithTimeouts sets the timeout values of the http server.
+func WithTimeouts(read, write, idle time.Duration) Option {
+	return func(h *Hub) error {
+		h.httpReadTimeout = read
+		h.httpWriteTimeout = write
+		h.httpIdleTimeout = idle
+		return nil
+	}
+}
+
+// WithMiddlewares adds to the set of middlewares used on the http server.
+func WithMiddlewares(mws ...Middleware) Option {
+	return func(h *Hub) error {
+		h.httpMiddlewares = append(h.httpMiddlewares, mws...)
+		return nil
+	}
+}
+
+// WithTLSConfig sets the tlsConfig of the http server.
+func WithTLSConfig(c *tls.Config) Option {
+	return func(h *Hub) error {
+		h.httpTLSConfig = c
+		return nil
+	}
+}
+
+// WithShutdownTimeout sets the tlsConfig of the http server.
+func WithShutdownTimeout(t time.Duration) Option {
+	return func(h *Hub) error {
+		h.shutdownTimeout = t
+		return nil
+	}
+}
+
+// Hub acts as a gRPC proxy.
+//
+// It runs an HTTP server exposing a websocket endpoint
+// for servers to dial in and register themselves.
+//
+// It also exposes a gRPC server that let clients
+// make requests against remote server services or the hub own services.
+//
+// For a request to be proxied to a remote server, the client must include
+// a gRPC metadata map containing hub specific authentication fields.
+//
+// Connector is provided as a helper for dialing in and registering to a hub.
+// It sets the correct gRPC metadata and returns a listener that can be used
+// to serve any gRPC server.
 type Hub struct {
 	ClientRegistry client.Registry
 
-	config *Config
 	logger *log.Logger
 	server *http.Server
 
-	nextRequestID RequestIDGenerator
+	grpcListenAddr string
+
+	httpListenAddr   string
+	httpReadTimeout  time.Duration
+	httpWriteTimeout time.Duration
+	httpIdleTimeout  time.Duration
+	httpMiddlewares  []Middleware
+	httpTLSConfig    *tls.Config
+
+	shutdownTimeout time.Duration
 
 	once       *sync.Once
 	closingCh  chan struct{}
@@ -95,45 +142,37 @@ type Hub struct {
 }
 
 // New .
-func New(cfg *Config) *Hub {
-	if cfg == nil {
-		cfg = &Config{}
-	}
-	HTTPAddr := cfg.HTTPListenAddr
-	if HTTPAddr == "" {
-		HTTPAddr = defaultHTTPListenAddr
-	}
-	GRPCAddr := cfg.GRPCListenAddr
-	if GRPCAddr == "" {
-		GRPCAddr = defaultGRPCListenAddr
-	}
-	logger := cfg.Logger
-	if logger == nil {
-		logger = log.New(defaultLogOutput, "hub: ", log.LstdFlags)
-	}
-	nextRequestID := cfg.RequestIDGenerator
-	if nextRequestID == nil {
-		nextRequestID = defaultRequestIDGenerator
-	}
-	registry := cfg.Registry
-	if registry == nil {
-		registry = client.NewRegistryMem()
+func New(opts ...Option) (*Hub, error) {
+	h := &Hub{
+		ClientRegistry: client.NewRegistryMem(),
+
+		logger: defaultLogger,
+
+		grpcListenAddr: defaultGRPCListenAddr,
+
+		httpListenAddr:   defaultHTTPListenAddr,
+		httpReadTimeout:  defaultHTTPReadTimeout,
+		httpWriteTimeout: defaultHTTPWriteTimeout,
+		httpIdleTimeout:  defaultHTTPIdleTimeout,
+		httpMiddlewares:  []Middleware{tracingMiddleware, loggingMiddleware(defaultLogger)},
+
+		shutdownTimeout: defaultShutdownTimeout,
+
+		once:       &sync.Once{},
+		closingCh:  make(chan struct{}),
+		shutdownCh: make(chan struct{}),
 	}
 
-	h := &Hub{
-		ClientRegistry: registry,
-		config:         cfg,
-		logger:         logger,
-		nextRequestID:  nextRequestID,
-		once:           &sync.Once{},
-		closingCh:      make(chan struct{}),
-		shutdownCh:     make(chan struct{}),
+	for _, opt := range opts {
+		if err := opt(h); err != nil {
+			return nil, err
+		}
 	}
 
 	go h.listenAndServe()
 	go h.listenAndServeGRPC()
 
-	return h
+	return h, nil
 }
 
 // Close .
@@ -190,13 +229,13 @@ func (h *Hub) listenAndServeGRPC() {
 		server.GracefulStop()
 	}()
 
-	l, err := net.Listen("tcp", h.config.GRPCListenAddr)
+	l, err := net.Listen("tcp", h.grpcListenAddr)
 	if err != nil {
 		h.logger.Fatalf("failed to listen: %v", err)
 		return
 	}
 
-	h.logger.Printf("gRPC server listening on: %v", h.config.GRPCListenAddr)
+	h.logger.Printf("gRPC server listening on: %v", h.grpcListenAddr)
 	if err := server.Serve(l); err != nil && err != grpc.ErrServerStopped {
 		h.logger.Printf("gRPC server listen error: %v", err)
 	}
@@ -216,19 +255,14 @@ func (h *Hub) listenAndServe() {
 	router.HandleFunc("/health", handleHealth)
 	router.HandleFunc("/ws", h.handleWS)
 
-	defaultMiddlewares := []Middleware{h.tracingMiddleware, h.loggingMiddleware}
-	if len(h.config.Middlewares) > 0 {
-		defaultMiddlewares = append(defaultMiddlewares, h.config.Middlewares...)
-	}
-
 	h.server = &http.Server{
-		Addr:         h.config.HTTPListenAddr,
-		Handler:      chainMiddlewares(router, defaultMiddlewares...),
+		Addr:         h.httpListenAddr,
+		Handler:      chainMiddlewares(router, h.httpMiddlewares...),
 		ErrorLog:     h.logger,
-		TLSConfig:    h.config.TLSConfig,
-		ReadTimeout:  defaultReadTimeout,
-		WriteTimeout: defaultWriteTimeout,
-		IdleTimeout:  defaultIdleTimeout,
+		TLSConfig:    h.httpTLSConfig,
+		ReadTimeout:  h.httpReadTimeout,
+		WriteTimeout: h.httpWriteTimeout,
+		IdleTimeout:  h.httpIdleTimeout,
 	}
 
 	go func() {
@@ -304,24 +338,26 @@ func (h *Hub) handleWS(w http.ResponseWriter, r *http.Request) {
 	}()
 }
 
-func (h *Hub) loggingMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		defer func() {
-			requestID := w.Header().Get("X-Request-Id")
-			if requestID == "" {
-				requestID = "unknown"
-			}
-			h.logger.Println(requestID, r.Method, r.URL.Path, r.RemoteAddr, r.UserAgent())
-		}()
-		next.ServeHTTP(w, r)
-	})
+func loggingMiddleware(logger *log.Logger) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			defer func() {
+				requestID := w.Header().Get("X-Request-Id")
+				if requestID == "" {
+					requestID = "unknown"
+				}
+				logger.Println(requestID, r.Method, r.URL.Path, r.RemoteAddr, r.UserAgent())
+			}()
+			next.ServeHTTP(w, r)
+		})
+	}
 }
 
-func (h *Hub) tracingMiddleware(next http.Handler) http.Handler {
+func tracingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		requestID := r.Header.Get("X-Request-Id")
 		if requestID == "" {
-			requestID = h.nextRequestID()
+			requestID = strconv.FormatInt(time.Now().UnixNano(), 36)
 		}
 		w.Header().Set("X-Request-Id", requestID)
 		next.ServeHTTP(w, r)
