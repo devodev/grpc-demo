@@ -136,6 +136,11 @@ type Hub struct {
 
 	shutdownTimeout time.Duration
 
+	activityCh chan string
+
+	mu              *sync.Mutex
+	activityReaders []chan string
+
 	once       *sync.Once
 	closingCh  chan struct{}
 	shutdownCh chan struct{}
@@ -143,6 +148,7 @@ type Hub struct {
 
 // New .
 func New(opts ...Option) (*Hub, error) {
+	var readers []chan string
 	h := &Hub{
 		ClientRegistry: client.NewRegistryMem(),
 
@@ -158,6 +164,11 @@ func New(opts ...Option) (*Hub, error) {
 
 		shutdownTimeout: defaultShutdownTimeout,
 
+		activityCh: make(chan string),
+
+		mu:              &sync.Mutex{},
+		activityReaders: readers,
+
 		once:       &sync.Once{},
 		closingCh:  make(chan struct{}),
 		shutdownCh: make(chan struct{}),
@@ -169,6 +180,7 @@ func New(opts ...Option) (*Hub, error) {
 		}
 	}
 
+	go h.handleActivityCh()
 	go h.listenAndServe()
 	go h.listenAndServeGRPC()
 
@@ -181,6 +193,56 @@ func (h *Hub) Close() {
 		close(h.closingCh)
 		<-h.shutdownCh
 	})
+}
+
+func (h *Hub) sendActivity(message string) error {
+	select {
+	case h.activityCh <- message:
+	default:
+		return fmt.Errorf("activity channel closed")
+	}
+	return nil
+}
+
+func (h *Hub) getActivityCh() <-chan string {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	activityCh := make(chan string)
+	h.activityReaders = append(h.activityReaders, activityCh)
+	return activityCh
+}
+
+func (h *Hub) handleActivityCh() {
+	var wg sync.WaitGroup
+Loop:
+	for {
+		select {
+		case <-h.closingCh:
+			break Loop
+		case message := <-h.activityCh:
+			h.logger.Printf(message)
+			h.mu.Lock()
+			wg.Add(len(h.activityReaders))
+			idx := 0
+			for _, readerCh := range h.activityReaders {
+				go func(ch chan string) {
+					defer wg.Done()
+					select {
+					default:
+					case ch <- message:
+						h.activityReaders[idx] = ch
+						idx++
+					}
+				}(readerCh)
+			}
+			wg.Wait()
+			h.activityReaders = h.activityReaders[:idx]
+			h.mu.Unlock()
+		}
+	}
+	for _, ch := range h.activityReaders {
+		close(ch)
+	}
 }
 
 func (h *Hub) listenAndServeGRPC() {
@@ -209,7 +271,7 @@ func (h *Hub) listenAndServeGRPC() {
 					return client.Session.Open()
 				}),
 			)
-			h.logger.Printf("proxying gRPC request (%v) to: %v", fullMethodName, name)
+			h.sendActivity(fmt.Sprintf("proxying gRPC request (%v) to: %v", fullMethodName, name))
 			return ctx, conn, err
 		}
 		return nil, nil, grpc.Errorf(codes.Unimplemented, "Unknown method")
@@ -219,7 +281,7 @@ func (h *Hub) listenAndServeGRPC() {
 		grpc.CustomCodec(proxy.Codec()),
 		grpc.UnknownServiceHandler(proxy.TransparentHandler(director)),
 	)
-	hubService := &api.HubService{Registry: h.ClientRegistry}
+	hubService := &api.HubService{Registry: h.ClientRegistry, ActivityCh: h.getActivityCh()}
 	hubService.RegisterServer(server)
 
 	go func() {
@@ -326,13 +388,13 @@ func (h *Hub) handleWS(w http.ResponseWriter, r *http.Request) {
 		wsRwc.CloseWithMessage(err.Error())
 		h.logger.Println(err)
 	}
-	h.logger.Printf("registered client with name: %v", metaName)
+	h.sendActivity(fmt.Sprintf("registered client with name: %v", metaName))
 
 	go func() {
 		defer h.ClientRegistry.Unregister(metaName)
 		select {
 		case <-cc.Session.CloseChan():
-			h.logger.Printf("[client: %v] connection closed", metaName)
+			h.sendActivity(fmt.Sprintf("unregistered client with name: %v", metaName))
 			return
 		}
 	}()

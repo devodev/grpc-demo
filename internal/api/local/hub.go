@@ -8,11 +8,14 @@ import (
 	pb "github.com/devodev/grpc-demo/internal/pb/local"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // HubService implements pb.Hub.
 type HubService struct {
-	Registry client.Registry
+	Registry   client.Registry
+	ActivityCh <-chan string
 }
 
 // RegisterServer resgisters itself to a grpc server.
@@ -37,4 +40,14 @@ func (s *HubService) ListClients(ctx context.Context, r *pb.HubListClientsReques
 		clients = append(clients, c)
 	}
 	return &pb.HubListClientsResponse{Count: int64(len(clients)), Clients: clients}, nil
+}
+
+// ActivityFeed returns a stream of ActivityEvent.
+func (s *HubService) ActivityFeed(req *pb.HubActivityFeedRequest, server pb.Hub_ActivityFeedServer) error {
+	for message := range s.ActivityCh {
+		if err := server.Send(&pb.ActivityEvent{Message: message}); err != nil {
+			return status.Errorf(codes.Aborted, "error: %v", err)
+		}
+	}
+	return nil
 }
