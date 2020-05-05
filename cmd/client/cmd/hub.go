@@ -37,10 +37,10 @@ func newCommandHubListClients() *cobra.Command {
 				return err
 			}
 			defer conn.Close()
-			client := pb.NewClientClient(conn)
+			hubClient := pb.NewHubClient(conn)
 
-			var v pb.ClientListRequest
-			fn := client.List
+			var v pb.HubListClientsRequest
+			fn := hubClient.ListClients
 
 			return config.RoundTrip(func(cfg *grpc.Config, in grpc.Decoder, out grpc.Encoder) error {
 				if cfg.PrintSampleRequest {

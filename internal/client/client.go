@@ -3,6 +3,7 @@ package client
 import (
 	"fmt"
 	"io"
+	"time"
 
 	"github.com/hashicorp/yamux"
 )
@@ -19,7 +20,8 @@ func (e ErrEmptyAttribute) Error() string {
 // Client represents a remote gRPC server.
 // The session stored wraps a RWC.
 type Client struct {
-	Name string
+	Name           string
+	ConnectionTime time.Time
 
 	Session *yamux.Session
 }
@@ -33,5 +35,5 @@ func New(rwc io.ReadWriteCloser, name string) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Client{Name: name, Session: s}, nil
+	return &Client{Name: name, ConnectionTime: time.Now(), Session: s}, nil
 }

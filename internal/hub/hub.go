@@ -181,7 +181,7 @@ func (h *Hub) listenAndServeGRPC() {
 		grpc.CustomCodec(proxy.Codec()),
 		grpc.UnknownServiceHandler(proxy.TransparentHandler(director)),
 	)
-	hubService := &api.ClientService{Registry: h.ClientRegistry}
+	hubService := &api.HubService{Registry: h.ClientRegistry}
 	hubService.RegisterServer(server)
 
 	go func() {

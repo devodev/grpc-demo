@@ -7,7 +7,7 @@ import (
 
 // Registry is an interface used to store and retrieve clients.
 type Registry interface {
-	List() []string
+	List() []*Client
 	Get(string) (*Client, error)
 	Register(*Client, string) error
 	Unregister(string) error
@@ -65,15 +65,15 @@ func (r *RegistryMem) Get(name string) (*Client, error) {
 }
 
 // List implements the ClientRegistry interface.
-// It returns the list of client names currently registered.
-func (r *RegistryMem) List() []string {
+// It returns the list of clients currently registered.
+func (r *RegistryMem) List() []*Client {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	var names []string
+	var clients []*Client
 	for _, c := range r.clients {
-		names = append(names, c.Name)
+		clients = append(clients, c)
 	}
-	return names
+	return clients
 }
 
 // Count implements the ClientRegistry interface.

@@ -29,14 +29,18 @@ const (
 // of the legacy proto package is being used.
 const _ = proto.ProtoPackageIsVersion4
 
-type ClientListRequest struct {
+type Client struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
+
+	Name           string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	ConnectionTime string `protobuf:"bytes,2,opt,name=connectionTime,proto3" json:"connectionTime,omitempty"`
+	Uptime         string `protobuf:"bytes,3,opt,name=uptime,proto3" json:"uptime,omitempty"`
 }
 
-func (x *ClientListRequest) Reset() {
-	*x = ClientListRequest{}
+func (x *Client) Reset() {
+	*x = Client{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_hub_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -44,13 +48,13 @@ func (x *ClientListRequest) Reset() {
 	}
 }
 
-func (x *ClientListRequest) String() string {
+func (x *Client) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ClientListRequest) ProtoMessage() {}
+func (*Client) ProtoMessage() {}
 
-func (x *ClientListRequest) ProtoReflect() protoreflect.Message {
+func (x *Client) ProtoReflect() protoreflect.Message {
 	mi := &file_hub_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -62,22 +66,40 @@ func (x *ClientListRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ClientListRequest.ProtoReflect.Descriptor instead.
-func (*ClientListRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use Client.ProtoReflect.Descriptor instead.
+func (*Client) Descriptor() ([]byte, []int) {
 	return file_hub_proto_rawDescGZIP(), []int{0}
 }
 
-type ClientListResponse struct {
+func (x *Client) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *Client) GetConnectionTime() string {
+	if x != nil {
+		return x.ConnectionTime
+	}
+	return ""
+}
+
+func (x *Client) GetUptime() string {
+	if x != nil {
+		return x.Uptime
+	}
+	return ""
+}
+
+type HubListClientsRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
-
-	Count int64    `protobuf:"varint,1,opt,name=count,proto3" json:"count,omitempty"`
-	Names []string `protobuf:"bytes,2,rep,name=names,proto3" json:"names,omitempty"`
 }
 
-func (x *ClientListResponse) Reset() {
-	*x = ClientListResponse{}
+func (x *HubListClientsRequest) Reset() {
+	*x = HubListClientsRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_hub_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -85,13 +107,13 @@ func (x *ClientListResponse) Reset() {
 	}
 }
 
-func (x *ClientListResponse) String() string {
+func (x *HubListClientsRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ClientListResponse) ProtoMessage() {}
+func (*HubListClientsRequest) ProtoMessage() {}
 
-func (x *ClientListResponse) ProtoReflect() protoreflect.Message {
+func (x *HubListClientsRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_hub_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -103,21 +125,62 @@ func (x *ClientListResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ClientListResponse.ProtoReflect.Descriptor instead.
-func (*ClientListResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use HubListClientsRequest.ProtoReflect.Descriptor instead.
+func (*HubListClientsRequest) Descriptor() ([]byte, []int) {
 	return file_hub_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *ClientListResponse) GetCount() int64 {
+type HubListClientsResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Count   int64     `protobuf:"varint,1,opt,name=count,proto3" json:"count,omitempty"`
+	Clients []*Client `protobuf:"bytes,2,rep,name=clients,proto3" json:"clients,omitempty"`
+}
+
+func (x *HubListClientsResponse) Reset() {
+	*x = HubListClientsResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_hub_proto_msgTypes[2]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *HubListClientsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HubListClientsResponse) ProtoMessage() {}
+
+func (x *HubListClientsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_hub_proto_msgTypes[2]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HubListClientsResponse.ProtoReflect.Descriptor instead.
+func (*HubListClientsResponse) Descriptor() ([]byte, []int) {
+	return file_hub_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *HubListClientsResponse) GetCount() int64 {
 	if x != nil {
 		return x.Count
 	}
 	return 0
 }
 
-func (x *ClientListResponse) GetNames() []string {
+func (x *HubListClientsResponse) GetClients() []*Client {
 	if x != nil {
-		return x.Names
+		return x.Clients
 	}
 	return nil
 }
@@ -126,21 +189,29 @@ var File_hub_proto protoreflect.FileDescriptor
 
 var file_hub_proto_rawDesc = []byte{
 	0x0a, 0x09, 0x68, 0x75, 0x62, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x08, 0x69, 0x6e, 0x74,
-	0x65, 0x72, 0x6e, 0x61, 0x6c, 0x22, 0x13, 0x0a, 0x11, 0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x4c,
-	0x69, 0x73, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x40, 0x0a, 0x12, 0x43, 0x6c,
-	0x69, 0x65, 0x6e, 0x74, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
-	0x12, 0x14, 0x0a, 0x05, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52,
-	0x05, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x12, 0x14, 0x0a, 0x05, 0x6e, 0x61, 0x6d, 0x65, 0x73, 0x18,
-	0x02, 0x20, 0x03, 0x28, 0x09, 0x52, 0x05, 0x6e, 0x61, 0x6d, 0x65, 0x73, 0x32, 0x4b, 0x0a, 0x06,
-	0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x12, 0x41, 0x0a, 0x04, 0x4c, 0x69, 0x73, 0x74, 0x12, 0x1b,
-	0x2e, 0x69, 0x6e, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2e, 0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74,
-	0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1c, 0x2e, 0x69, 0x6e,
-	0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2e, 0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x4c, 0x69, 0x73,
-	0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x33, 0x5a, 0x31, 0x67, 0x69, 0x74,
-	0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x64, 0x65, 0x76, 0x6f, 0x64, 0x65, 0x76, 0x2f,
-	0x67, 0x72, 0x70, 0x63, 0x2d, 0x64, 0x65, 0x6d, 0x6f, 0x2f, 0x69, 0x6e, 0x74, 0x65, 0x72, 0x6e,
-	0x61, 0x6c, 0x2f, 0x70, 0x62, 0x2f, 0x69, 0x6e, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x62, 0x06,
-	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x65, 0x72, 0x6e, 0x61, 0x6c, 0x22, 0x5c, 0x0a, 0x06, 0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x12,
+	0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e,
+	0x61, 0x6d, 0x65, 0x12, 0x26, 0x0a, 0x0e, 0x63, 0x6f, 0x6e, 0x6e, 0x65, 0x63, 0x74, 0x69, 0x6f,
+	0x6e, 0x54, 0x69, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0e, 0x63, 0x6f, 0x6e,
+	0x6e, 0x65, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x54, 0x69, 0x6d, 0x65, 0x12, 0x16, 0x0a, 0x06, 0x75,
+	0x70, 0x74, 0x69, 0x6d, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x75, 0x70, 0x74,
+	0x69, 0x6d, 0x65, 0x22, 0x17, 0x0a, 0x15, 0x48, 0x75, 0x62, 0x4c, 0x69, 0x73, 0x74, 0x43, 0x6c,
+	0x69, 0x65, 0x6e, 0x74, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x5a, 0x0a, 0x16,
+	0x48, 0x75, 0x62, 0x4c, 0x69, 0x73, 0x74, 0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x73, 0x52, 0x65,
+	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x05, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x12, 0x2a, 0x0a, 0x07,
+	0x63, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x73, 0x18, 0x02, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x10, 0x2e,
+	0x69, 0x6e, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2e, 0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x52,
+	0x07, 0x63, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x73, 0x32, 0x57, 0x0a, 0x03, 0x48, 0x75, 0x62, 0x12,
+	0x50, 0x0a, 0x0b, 0x4c, 0x69, 0x73, 0x74, 0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x73, 0x12, 0x1f,
+	0x2e, 0x69, 0x6e, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2e, 0x48, 0x75, 0x62, 0x4c, 0x69, 0x73,
+	0x74, 0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a,
+	0x20, 0x2e, 0x69, 0x6e, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2e, 0x48, 0x75, 0x62, 0x4c, 0x69,
+	0x73, 0x74, 0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
+	0x65, 0x42, 0x33, 0x5a, 0x31, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f,
+	0x64, 0x65, 0x76, 0x6f, 0x64, 0x65, 0x76, 0x2f, 0x67, 0x72, 0x70, 0x63, 0x2d, 0x64, 0x65, 0x6d,
+	0x6f, 0x2f, 0x69, 0x6e, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2f, 0x70, 0x62, 0x2f, 0x69, 0x6e,
+	0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -155,19 +226,21 @@ func file_hub_proto_rawDescGZIP() []byte {
 	return file_hub_proto_rawDescData
 }
 
-var file_hub_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_hub_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_hub_proto_goTypes = []interface{}{
-	(*ClientListRequest)(nil),  // 0: internal.ClientListRequest
-	(*ClientListResponse)(nil), // 1: internal.ClientListResponse
+	(*Client)(nil),                 // 0: internal.Client
+	(*HubListClientsRequest)(nil),  // 1: internal.HubListClientsRequest
+	(*HubListClientsResponse)(nil), // 2: internal.HubListClientsResponse
 }
 var file_hub_proto_depIdxs = []int32{
-	0, // 0: internal.Client.List:input_type -> internal.ClientListRequest
-	1, // 1: internal.Client.List:output_type -> internal.ClientListResponse
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0, // 0: internal.HubListClientsResponse.clients:type_name -> internal.Client
+	1, // 1: internal.Hub.ListClients:input_type -> internal.HubListClientsRequest
+	2, // 2: internal.Hub.ListClients:output_type -> internal.HubListClientsResponse
+	2, // [2:3] is the sub-list for method output_type
+	1, // [1:2] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_hub_proto_init() }
@@ -177,7 +250,7 @@ func file_hub_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_hub_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ClientListRequest); i {
+			switch v := v.(*Client); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -189,7 +262,19 @@ func file_hub_proto_init() {
 			}
 		}
 		file_hub_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ClientListResponse); i {
+			switch v := v.(*HubListClientsRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_hub_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*HubListClientsResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -207,7 +292,7 @@ func file_hub_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_hub_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
@@ -229,72 +314,72 @@ var _ grpc.ClientConnInterface
 // is compatible with the grpc package it is being compiled against.
 const _ = grpc.SupportPackageIsVersion6
 
-// ClientClient is the client API for Client service.
+// HubClient is the client API for Hub service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
-type ClientClient interface {
-	List(ctx context.Context, in *ClientListRequest, opts ...grpc.CallOption) (*ClientListResponse, error)
+type HubClient interface {
+	ListClients(ctx context.Context, in *HubListClientsRequest, opts ...grpc.CallOption) (*HubListClientsResponse, error)
 }
 
-type clientClient struct {
+type hubClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewClientClient(cc grpc.ClientConnInterface) ClientClient {
-	return &clientClient{cc}
+func NewHubClient(cc grpc.ClientConnInterface) HubClient {
+	return &hubClient{cc}
 }
 
-func (c *clientClient) List(ctx context.Context, in *ClientListRequest, opts ...grpc.CallOption) (*ClientListResponse, error) {
-	out := new(ClientListResponse)
-	err := c.cc.Invoke(ctx, "/internal.Client/List", in, out, opts...)
+func (c *hubClient) ListClients(ctx context.Context, in *HubListClientsRequest, opts ...grpc.CallOption) (*HubListClientsResponse, error) {
+	out := new(HubListClientsResponse)
+	err := c.cc.Invoke(ctx, "/internal.Hub/ListClients", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// ClientServer is the server API for Client service.
-type ClientServer interface {
-	List(context.Context, *ClientListRequest) (*ClientListResponse, error)
+// HubServer is the server API for Hub service.
+type HubServer interface {
+	ListClients(context.Context, *HubListClientsRequest) (*HubListClientsResponse, error)
 }
 
-// UnimplementedClientServer can be embedded to have forward compatible implementations.
-type UnimplementedClientServer struct {
+// UnimplementedHubServer can be embedded to have forward compatible implementations.
+type UnimplementedHubServer struct {
 }
 
-func (*UnimplementedClientServer) List(context.Context, *ClientListRequest) (*ClientListResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
+func (*UnimplementedHubServer) ListClients(context.Context, *HubListClientsRequest) (*HubListClientsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListClients not implemented")
 }
 
-func RegisterClientServer(s *grpc.Server, srv ClientServer) {
-	s.RegisterService(&_Client_serviceDesc, srv)
+func RegisterHubServer(s *grpc.Server, srv HubServer) {
+	s.RegisterService(&_Hub_serviceDesc, srv)
 }
 
-func _Client_List_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ClientListRequest)
+func _Hub_ListClients_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HubListClientsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ClientServer).List(ctx, in)
+		return srv.(HubServer).ListClients(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/internal.Client/List",
+		FullMethod: "/internal.Hub/ListClients",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ClientServer).List(ctx, req.(*ClientListRequest))
+		return srv.(HubServer).ListClients(ctx, req.(*HubListClientsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-var _Client_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "internal.Client",
-	HandlerType: (*ClientServer)(nil),
+var _Hub_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "internal.Hub",
+	HandlerType: (*HubServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "List",
-			Handler:    _Client_List_Handler,
+			MethodName: "ListClients",
+			Handler:    _Hub_ListClients_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
