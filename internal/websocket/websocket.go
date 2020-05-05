@@ -22,23 +22,14 @@ var (
 	// Maximum message size allowed from peer.
 	maxMessageSize = int64(512)
 
-	// CloseNormalClosure is the default message sent when close is called.
+	// CloseNormalClosure is the default websocket close message.
+	// The substring "closed" must be present for the
+	// gorilla client to return without error.
 	closeNormalClosureMessage = "closed"
 )
 
 // PongHandlerFunc .
 type PongHandlerFunc func(appData string) error
-
-// RWC .
-type RWC struct {
-	r  io.Reader
-	mt int
-	c  *websocket.Conn
-
-	pingEnabled     bool
-	pingTicker      *time.Ticker
-	pongHandlerFunc PongHandlerFunc
-}
 
 // RWCOption provide a functional wa of
 type RWCOption func(*RWC)
@@ -67,9 +58,20 @@ func WithMessageType(mt int) (RWCOption, error) {
 	}, nil
 }
 
-// NewRWC returns a websocket ReadWriteCloser enforcing the provided
+// RWC .
+type RWC struct {
+	r  io.Reader
+	mt int
+	c  *websocket.Conn
+
+	pingEnabled     bool
+	pingTicker      *time.Ticker
+	pongHandlerFunc PongHandlerFunc
+}
+
+// ReadWriteCloser returns a websocket ReadWriteCloser enforcing the provided
 // message type on write/read.
-func NewRWC(conn *websocket.Conn, options ...RWCOption) (*RWC, error) {
+func ReadWriteCloser(conn *websocket.Conn, options ...RWCOption) (*RWC, error) {
 	rwc := &RWC{
 		mt:              websocket.BinaryMessage,
 		c:               conn,
@@ -84,10 +86,6 @@ func NewRWC(conn *websocket.Conn, options ...RWCOption) (*RWC, error) {
 		rwc.enablePing()
 	}
 	return rwc, nil
-}
-
-func (c *RWC) setPongHandler(f PongHandlerFunc) {
-	c.pongHandlerFunc = f
 }
 
 // Write .
@@ -131,16 +129,22 @@ func (c *RWC) Read(p []byte) (int, error) {
 	}
 }
 
-// Close .
+// Close closes the underlying websocket connection
+// and uses the default close message.
 func (c *RWC) Close() error {
 	return c.CloseWithMessage(closeNormalClosureMessage)
 }
 
-// CloseWithMessage .
+// CloseWithMessage closes the underlying websocket connection
+// and uses the provided string as close message.
 func (c *RWC) CloseWithMessage(m string) error {
 	c.c.SetWriteDeadline(time.Now().Add(writeWait))
 	c.c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, m))
 	return c.c.Close()
+}
+
+func (c *RWC) setPongHandler(f PongHandlerFunc) {
+	c.pongHandlerFunc = f
 }
 
 // EnablePing .

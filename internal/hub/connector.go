@@ -62,7 +62,7 @@ func (h *Connector) dial() (*websocket.Conn, error) {
 }
 
 func (h *Connector) asListener(c *websocket.Conn) (*yamux.Session, error) {
-	wsRwc, err := ws.NewRWC(c)
+	wsRwc, err := ws.ReadWriteCloser(c)
 	if err != nil {
 		c.Close()
 		return nil, err

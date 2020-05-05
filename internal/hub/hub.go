@@ -3,9 +3,7 @@ package hub
 import (
 	"context"
 	"crypto/tls"
-	"crypto/x509"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
@@ -272,7 +270,7 @@ func (h *Hub) handleWS(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// wrap websocket conn into ReadWriteCloser
-	wsRwc, err := ws.NewRWC(wsConn)
+	wsRwc, err := ws.ReadWriteCloser(wsConn)
 	if err != nil {
 		wsConn.Close()
 		h.logger.Println(err)
@@ -328,31 +326,4 @@ func (h *Hub) tracingMiddleware(next http.Handler) http.Handler {
 		w.Header().Set("X-Request-Id", requestID)
 		next.ServeHTTP(w, r)
 	})
-}
-
-// CreateServerTLSConfig creates a tls config using the provided.
-func CreateServerTLSConfig(caPath, certPath, keyPath string) (*tls.Config, error) {
-	tlsConfig := &tls.Config{}
-	tlsConfig.PreferServerCipherSuites = true
-	if caPath != "" {
-		cacert, err := ioutil.ReadFile(caPath)
-		if err != nil {
-			return nil, fmt.Errorf("ca cert: %v", err)
-		}
-		certpool := x509.NewCertPool()
-		certpool.AppendCertsFromPEM(cacert)
-		tlsConfig.RootCAs = certpool
-	}
-	if certPath == "" {
-		return nil, fmt.Errorf("missing cert file")
-	}
-	if keyPath == "" {
-		return nil, fmt.Errorf("missing key file")
-	}
-	pair, err := tls.LoadX509KeyPair(certPath, keyPath)
-	if err != nil {
-		return nil, fmt.Errorf("cert/key: %v", err)
-	}
-	tlsConfig.Certificates = []tls.Certificate{pair}
-	return tlsConfig, nil
 }
