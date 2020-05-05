@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 
+	ws "github.com/devodev/grpc-demo/internal/websocket"
 	"github.com/gorilla/websocket"
 	"github.com/hashicorp/yamux"
 )
@@ -57,7 +58,7 @@ func (h *Dialer) DialAndWrap() (*yamux.Session, error) {
 	if err != nil {
 		return nil, err
 	}
-	wsRwc, err := NewRWC(websocket.BinaryMessage, wsConn)
+	wsRwc, err := ws.NewRWC(wsConn)
 	if err != nil {
 		wsConn.Close()
 		return nil, err

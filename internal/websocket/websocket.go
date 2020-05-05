@@ -44,27 +44,34 @@ type RWC struct {
 type RWCOption func(*RWC)
 
 // WithPingDisabled disables the ping process.
-func WithPingDisabled() RWCOption {
+func WithPingDisabled() (RWCOption, error) {
 	return func(c *RWC) {
 		c.pingEnabled = false
-	}
+	}, nil
 }
 
-//WithPongHandler sets a pong handler.
-func WithPongHandler(f PongHandlerFunc) RWCOption {
+// WithPongHandler sets a pong handler.
+func WithPongHandler(f PongHandlerFunc) (RWCOption, error) {
 	return func(c *RWC) {
 		c.setPongHandler(f)
+	}, nil
+}
+
+// WithMessageType sets the message type to use in Read/Write.
+func WithMessageType(mt int) (RWCOption, error) {
+	if mt != websocket.BinaryMessage && mt != websocket.TextMessage {
+		return nil, fmt.Errorf("invalid message type")
 	}
+	return func(c *RWC) {
+		c.mt = mt
+	}, nil
 }
 
 // NewRWC returns a websocket ReadWriteCloser enforcing the provided
 // message type on write/read.
-func NewRWC(mt int, conn *websocket.Conn, options ...RWCOption) (*RWC, error) {
-	if mt != websocket.BinaryMessage && mt != websocket.TextMessage {
-		return nil, fmt.Errorf("invalid message type")
-	}
+func NewRWC(conn *websocket.Conn, options ...RWCOption) (*RWC, error) {
 	rwc := &RWC{
-		mt:              mt,
+		mt:              websocket.BinaryMessage,
 		c:               conn,
 		pingEnabled:     true,
 		pongHandlerFunc: func(string) error { conn.SetReadDeadline(time.Now().Add(pongWait)); return nil },

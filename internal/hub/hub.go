@@ -18,6 +18,7 @@ import (
 
 	api "github.com/devodev/grpc-demo/internal/api/local"
 	"github.com/devodev/grpc-demo/internal/client"
+	ws "github.com/devodev/grpc-demo/internal/websocket"
 	"github.com/gorilla/websocket"
 	"github.com/mwitkow/grpc-proxy/proxy"
 	"google.golang.org/grpc"
@@ -271,7 +272,7 @@ func (h *Hub) handleWS(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// wrap websocket conn into ReadWriteCloser
-	wsRwc, err := NewRWC(websocket.BinaryMessage, wsConn)
+	wsRwc, err := ws.NewRWC(wsConn)
 	if err != nil {
 		wsConn.Close()
 		h.logger.Println(err)
