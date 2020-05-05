@@ -150,11 +150,12 @@ func (h *Hub) listenAndServeGRPC() {
 			if !ok {
 				return nil, nil, grpc.Errorf(codes.FailedPrecondition, "no metadata provided")
 			}
-			name, ok := md["name"]
+			nameList, ok := md["name"]
 			if !ok {
-				return nil, nil, grpc.Errorf(codes.FailedPrecondition, "Name not found in metadata")
+				return nil, nil, grpc.Errorf(codes.FailedPrecondition, "name not found in metadata")
 			}
-			client, err := h.clientRegistry.GetWithName(name[0])
+			name := nameList[0]
+			client, err := h.clientRegistry.Get(name)
 			if err != nil {
 				return nil, nil, grpc.Errorf(codes.FailedPrecondition, err.Error())
 			}
@@ -165,6 +166,7 @@ func (h *Hub) listenAndServeGRPC() {
 					return client.session.Open()
 				}),
 			)
+			h.logger.Printf("proxying gRPC request (%v) to: %v", fullMethodName, name)
 			return ctx, conn, err
 		}
 		return nil, nil, grpc.Errorf(codes.Unimplemented, "Unknown method")
@@ -279,14 +281,18 @@ func (h *Hub) handleWS(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	clientID := h.clientRegistry.Register(client)
-	h.logger.Printf("registered client with name: %v (clientID: %d)", client.Name, clientID)
+
+	if err := h.clientRegistry.Register(client, metaName); err != nil {
+		wsRwc.CloseWithMessage(err.Error())
+		h.logger.Println(err)
+	}
+	h.logger.Printf("registered client with name: %v", metaName)
 
 	go func() {
-		defer h.clientRegistry.Unregister(clientID)
+		defer h.clientRegistry.Unregister(metaName)
 		select {
 		case <-client.session.CloseChan():
-			h.logger.Printf("client%d: connecton closed", clientID)
+			h.logger.Printf("[client: %v] connection closed", metaName)
 			return
 		}
 	}()

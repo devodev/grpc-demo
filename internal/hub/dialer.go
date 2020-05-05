@@ -57,7 +57,7 @@ func (h *Dialer) DialAndWrap() (*yamux.Session, error) {
 	if err != nil {
 		return nil, err
 	}
-	wsRwc, err := hub.NewRWC(websocket.BinaryMessage, wsConn)
+	wsRwc, err := NewRWC(websocket.BinaryMessage, wsConn)
 	if err != nil {
 		wsConn.Close()
 		return nil, err
