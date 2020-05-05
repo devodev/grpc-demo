@@ -28,11 +28,12 @@ func writeOut(line string) {
 func newCommandRoot() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "client",
-		Short:   "Interact with the gRPC server.",
+		Short:   "Interact with the Hub.",
 		Version: "0.1.0",
 	}
 	cmd.AddCommand(
 		newCommandFluentd(),
+		newCommandHub(),
 	)
 	return cmd
 }

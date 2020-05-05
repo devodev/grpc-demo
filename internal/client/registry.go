@@ -1,12 +1,13 @@
-package hub
+package client
 
 import (
 	"fmt"
 	"sync"
 )
 
-// ClientRegistry is an interface used to store and retrieve clients.
-type ClientRegistry interface {
+// Registry is an interface used to store and retrieve clients.
+type Registry interface {
+	List() []string
 	Get(string) (*Client, error)
 	Register(*Client, string) error
 	Unregister(string) error
@@ -61,6 +62,18 @@ func (r *RegistryMem) Get(name string) (*Client, error) {
 		return nil, fmt.Errorf("get failed because client Name was not found")
 	}
 	return c, nil
+}
+
+// List implements the ClientRegistry interface.
+// It returns the list of client names currently registered.
+func (r *RegistryMem) List() []string {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	var names []string
+	for _, c := range r.clients {
+		names = append(names, c.Name)
+	}
+	return names
 }
 
 // Count implements the ClientRegistry interface.

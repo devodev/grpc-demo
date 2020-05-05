@@ -1,7 +1,7 @@
 HUB_LOCATION := ./cmd/hub
 SERVER_LOCATION := ./cmd/server
 CLIENT_LOCATION := ./cmd/client
-PB_LOCATION := ./internal/pb/external
+PB_LOCATION := ./internal/pb
 BINARY_LOCATION := ./bin
 
 KEY_OUT := $(BINARY_LOCATION)/test.key
@@ -11,14 +11,22 @@ CERT_OUT := $(BINARY_LOCATION)/test.crt
 
 all: build_hub build_server build_client
 
-pb/external/fluentd.pb.go: $(PB_LOCATION)/fluentd.proto
-	@protoc -I $(PB_LOCATION) \
+pb/remote/fluentd.pb.go: $(PB_LOCATION)/remote/fluentd.proto
+	@protoc -I $(PB_LOCATION)/remote \
 			-I ${GOPATH}/src \
-			--go_out=plugins=grpc:$(PB_LOCATION) \
+			--go_out=plugins=grpc:$(PB_LOCATION)/remote \
 			--go_opt=paths=source_relative \
-			$(PB_LOCATION)/fluentd.proto
+			$(PB_LOCATION)/remote/fluentd.proto
 
-pb: pb/external/fluentd.pb.go  ## compile protocol buffers
+pb/local/hub.pb.go: $(PB_LOCATION)/local/hub.proto
+	@protoc -I $(PB_LOCATION)/local \
+			-I ${GOPATH}/src \
+			--go_out=plugins=grpc:$(PB_LOCATION)/local \
+			--go_opt=paths=source_relative \
+			$(PB_LOCATION)/local/hub.proto
+
+pb: pb/remote/fluentd.pb.go \
+	pb/local/hub.pb.go  ## compile protocol buffers
 
 dep: ## Get dependencies
 	@go get -v -d ./...

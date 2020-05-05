@@ -20,7 +20,7 @@ import (
 
 // DialerConfig .
 type DialerConfig struct {
-	ServerAddr         string        `envconfig:"SERVER_ADDR" default:"localhost:8080"`
+	ServerAddr         string        `envconfig:"SERVER_ADDR" default:"localhost:9090"`
 	Timeout            time.Duration `envconfig:"TIMEOUT" default:"10s"`
 	TLS                bool          `envconfig:"TLS"`
 	ServerName         string        `envconfig:"TLS_SERVER_NAME"`

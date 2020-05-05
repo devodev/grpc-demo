@@ -3,11 +3,11 @@ package cmd
 import (
 	"context"
 
-	pb "github.com/devodev/grpc-demo/internal/pb/external"
-	"google.golang.org/grpc/metadata"
-
 	"github.com/devodev/grpc-demo/cmd/client/grpc"
+	pb "github.com/devodev/grpc-demo/internal/pb/remote"
+
 	"github.com/spf13/cobra"
+	"google.golang.org/grpc/metadata"
 )
 
 func newCommandFluentd() *cobra.Command {

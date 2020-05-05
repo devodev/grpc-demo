@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 
-	"github.com/devodev/grpc-demo/internal/api"
+	api "github.com/devodev/grpc-demo/internal/api/remote"
 	"github.com/devodev/grpc-demo/internal/hub"
 )
 

@@ -16,6 +16,8 @@ import (
 	"sync/atomic"
 	"time"
 
+	api "github.com/devodev/grpc-demo/internal/api/local"
+	"github.com/devodev/grpc-demo/internal/client"
 	"github.com/gorilla/websocket"
 	"github.com/mwitkow/grpc-proxy/proxy"
 	"google.golang.org/grpc"
@@ -60,7 +62,7 @@ type Config struct {
 	// RequestIDGenerator is used by the tracing middleware.
 	RequestIDGenerator RequestIDGenerator
 	// Registry is used to store clients.
-	Registry ClientRegistry
+	Registry client.Registry
 
 	// HTTPListenAddr is the address on which the HTTP server listens.
 	HTTPListenAddr string
@@ -80,13 +82,13 @@ type Config struct {
 
 // Hub .
 type Hub struct {
+	ClientRegistry client.Registry
+
 	config *Config
 	logger *log.Logger
 	server *http.Server
 
 	nextRequestID RequestIDGenerator
-
-	clientRegistry ClientRegistry
 
 	once       *sync.Once
 	closingCh  chan struct{}
@@ -116,14 +118,14 @@ func New(cfg *Config) *Hub {
 	}
 	registry := cfg.Registry
 	if registry == nil {
-		registry = NewRegistryMem()
+		registry = client.NewRegistryMem()
 	}
 
 	h := &Hub{
+		ClientRegistry: registry,
 		config:         cfg,
 		logger:         logger,
 		nextRequestID:  nextRequestID,
-		clientRegistry: registry,
 		once:           &sync.Once{},
 		closingCh:      make(chan struct{}),
 		shutdownCh:     make(chan struct{}),
@@ -145,6 +147,9 @@ func (h *Hub) Close() {
 
 func (h *Hub) listenAndServeGRPC() {
 	director := func(ctx context.Context, fullMethodName string) (context.Context, *grpc.ClientConn, error) {
+		if strings.HasPrefix(fullMethodName, "/internal.") {
+			return nil, nil, grpc.Errorf(codes.Unimplemented, "Unknown method")
+		}
 		if strings.HasPrefix(fullMethodName, "/external.") {
 			md, ok := metadata.FromIncomingContext(ctx)
 			if !ok {
@@ -155,7 +160,7 @@ func (h *Hub) listenAndServeGRPC() {
 				return nil, nil, grpc.Errorf(codes.FailedPrecondition, "name not found in metadata")
 			}
 			name := nameList[0]
-			client, err := h.clientRegistry.Get(name)
+			client, err := h.ClientRegistry.Get(name)
 			if err != nil {
 				return nil, nil, grpc.Errorf(codes.FailedPrecondition, err.Error())
 			}
@@ -163,7 +168,7 @@ func (h *Hub) listenAndServeGRPC() {
 				grpc.WithCodec(proxy.Codec()),
 				grpc.WithInsecure(),
 				grpc.WithDialer(func(s string, d time.Duration) (net.Conn, error) {
-					return client.session.Open()
+					return client.Session.Open()
 				}),
 			)
 			h.logger.Printf("proxying gRPC request (%v) to: %v", fullMethodName, name)
@@ -176,6 +181,8 @@ func (h *Hub) listenAndServeGRPC() {
 		grpc.CustomCodec(proxy.Codec()),
 		grpc.UnknownServiceHandler(proxy.TransparentHandler(director)),
 	)
+	hubService := &api.ClientService{Registry: h.ClientRegistry}
+	hubService.RegisterServer(server)
 
 	go func() {
 		<-h.closingCh
@@ -272,26 +279,26 @@ func (h *Hub) handleWS(w http.ResponseWriter, r *http.Request) {
 	}
 
 	metaName := r.Header.Get("X-Hub-Meta-Name")
-	client, err := NewClient(wsRwc, metaName)
+	cc, err := client.New(wsRwc, metaName)
 	if err != nil {
 		wsRwc.CloseWithMessage(err.Error())
 		h.logger.Println(err)
-		if _, ok := err.(*errEmptyAttribute); ok {
+		if _, ok := err.(*client.ErrEmptyAttribute); ok {
 			h.logger.Println("have you set the X-Hub-Meta-* headers?")
 		}
 		return
 	}
 
-	if err := h.clientRegistry.Register(client, metaName); err != nil {
+	if err := h.ClientRegistry.Register(cc, metaName); err != nil {
 		wsRwc.CloseWithMessage(err.Error())
 		h.logger.Println(err)
 	}
 	h.logger.Printf("registered client with name: %v", metaName)
 
 	go func() {
-		defer h.clientRegistry.Unregister(metaName)
+		defer h.ClientRegistry.Unregister(metaName)
 		select {
-		case <-client.session.CloseChan():
+		case <-cc.Session.CloseChan():
 			h.logger.Printf("[client: %v] connection closed", metaName)
 			return
 		}

@@ -1,9 +1,9 @@
-package api
+package remote
 
 import (
 	"context"
 
-	pb "github.com/devodev/grpc-demo/internal/pb/external"
+	pb "github.com/devodev/grpc-demo/internal/pb/remote"
 	"google.golang.org/grpc"
 )
 
