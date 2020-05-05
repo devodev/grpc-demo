@@ -57,3 +57,11 @@ $ cd ./bin
 $ echo '{}' | ./client hub list-clients
 $ echo '{}' | ./client fluentd start testserver
 ```
+
+## Ideas
+- Create internal.Activity service with Connect method.
+  - The Connect method returns a stream of ActivityEvent
+  - The message can contain an EventType field with possible values:
+    - Client Registered
+    - Client Unregistered
+    - Request Proxied
