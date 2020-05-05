@@ -4,6 +4,9 @@ CLIENT_LOCATION := ./cmd/client
 PB_LOCATION := ./internal/pb/external
 BINARY_LOCATION := ./bin
 
+KEY_OUT := $(BINARY_LOCATION)/test.key
+CERT_OUT := $(BINARY_LOCATION)/test.crt
+
 .PHONY: all pb dep build_hub build_server build_client clean gencert readcert
 
 all: build_hub build_server build_client
@@ -23,7 +26,7 @@ dep: ## Get dependencies
 setup_build:
 	@mkdir -p $(BINARY_LOCATION)
 
-build_hub: setup_build pb dep ## build hub binary
+build_hub: gencert setup_build pb dep ## build hub binary
 	@go build -i -v -o $(BINARY_LOCATION)/hub $(HUB_LOCATION)
 
 build_server: setup_build pb dep ## build server binary
@@ -39,9 +42,9 @@ clean: ## delete binary folder
 gencert: ## generate cert/key pair and output as test.crt/test.key
 	@echo "generating self signed cert.."
 	openssl req \
-		-newkey rsa:2048 -nodes -keyout test.key \
+		-newkey rsa:2048 -nodes -keyout $(KEY_OUT) \
 		-subj '/C=XX/ST=XX/L=XX/O=XX/CN=example.com' \
-		-x509 -days 365 -out test.crt
+		-x509 -days 365 -out $(CERT_OUT)
 
 readcert: ## print cert as text
 	@echo "reading generated cert.."
