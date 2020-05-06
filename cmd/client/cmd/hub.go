@@ -87,7 +87,7 @@ func newCommandHubActivityFeed() *cobra.Command {
 			hubClient := pb.NewHubClient(conn)
 
 			var v pb.HubActivityFeedRequest
-			fn := hubClient.ActivityFeed
+			fn := hubClient.StreamActivityFeed
 
 			return config.RoundTrip(func(cfg *grpc.Config, in grpc.Decoder, out grpc.Encoder) error {
 				if cfg.PrintSampleRequest {

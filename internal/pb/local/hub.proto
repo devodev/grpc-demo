@@ -12,7 +12,7 @@ message Client {
 
 service Hub {
     rpc ListClients (HubListClientsRequest) returns (HubListClientsResponse);
-    rpc ActivityFeed (HubActivityFeedRequest) returns (stream ActivityEvent);
+    rpc StreamActivityFeed (HubActivityFeedRequest) returns (stream ActivityEvent);
 }
 
 message HubListClientsRequest {
