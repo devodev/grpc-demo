@@ -16,7 +16,9 @@ import (
 
 	api "github.com/devodev/grpc-demo/internal/api/local"
 	"github.com/devodev/grpc-demo/internal/client"
+	"github.com/devodev/grpc-demo/internal/feed"
 	ws "github.com/devodev/grpc-demo/internal/websocket"
+
 	"github.com/gorilla/websocket"
 	"github.com/mwitkow/grpc-proxy/proxy"
 	"google.golang.org/grpc"
@@ -122,8 +124,9 @@ func WithShutdownTimeout(t time.Duration) Option {
 type Hub struct {
 	ClientRegistry client.Registry
 
-	logger *log.Logger
-	server *http.Server
+	logger       *log.Logger
+	server       *http.Server
+	activityFeed *feed.Feed
 
 	grpcListenAddr string
 
@@ -146,7 +149,8 @@ func New(opts ...Option) (*Hub, error) {
 	h := &Hub{
 		ClientRegistry: client.NewRegistryMem(),
 
-		logger: defaultLogger,
+		logger:       defaultLogger,
+		activityFeed: feed.New(),
 
 		grpcListenAddr: defaultGRPCListenAddr,
 
@@ -168,6 +172,19 @@ func New(opts ...Option) (*Hub, error) {
 			return nil, err
 		}
 	}
+
+	go h.activityFeed.StartRouter(h.closingCh)
+	go func() {
+		ch := h.activityFeed.GetCh(h.closingCh)
+		for {
+			select {
+			case <-h.closingCh:
+				return
+			case message := <-ch:
+				h.logger.Println(message)
+			}
+		}
+	}()
 
 	go h.listenAndServe()
 	go h.listenAndServeGRPC()
@@ -209,7 +226,7 @@ func (h *Hub) listenAndServeGRPC() {
 					return client.Session.Open()
 				}),
 			)
-			h.logger.Printf("proxying gRPC request (%v) to: %v", fullMethodName, name)
+			h.activityFeed.Send(fmt.Sprintf("proxying gRPC request (%v) to: %v", fullMethodName, name))
 			return ctx, conn, err
 		}
 		return nil, nil, grpc.Errorf(codes.Unimplemented, "Unknown method")
@@ -219,7 +236,7 @@ func (h *Hub) listenAndServeGRPC() {
 		grpc.CustomCodec(proxy.Codec()),
 		grpc.UnknownServiceHandler(proxy.TransparentHandler(director)),
 	)
-	hubService := &api.HubService{Registry: h.ClientRegistry}
+	hubService := &api.HubService{Registry: h.ClientRegistry, ActivityFeed: h.activityFeed}
 	hubService.RegisterServer(server)
 
 	go func() {
@@ -326,13 +343,13 @@ func (h *Hub) handleWS(w http.ResponseWriter, r *http.Request) {
 		wsRwc.CloseWithMessage(err.Error())
 		h.logger.Println(err)
 	}
-	h.logger.Printf("registered client with name: %v", metaName)
+	h.activityFeed.Send(fmt.Sprintf("registered client with name: %v", metaName))
 
 	go func() {
 		defer h.ClientRegistry.Unregister(metaName)
 		select {
 		case <-cc.Session.CloseChan():
-			h.logger.Printf("[client: %v] connection closed", metaName)
+			h.activityFeed.Send(fmt.Sprintf("unregistered client with name: %v", metaName))
 			return
 		}
 	}()
