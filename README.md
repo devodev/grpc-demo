@@ -16,9 +16,8 @@ The Server hosts a plain gRPC server that exposes its services by registering it
 ### Client
 The Client is a CLI that can send gRPC requests to both the remote Servers services connected to the Hub and the Hub gRPC services.
 
-## Diagrams
-<!-- ![Implementation Diagram 1](assets/img/implementation_diagram_1.png "Implementation Diagram 1")
-![Implementation Sequence Diagram 1](assets/img/implementation_sequence_diagram_1.png "Implementation Sequence Diagram 1") -->
+## Flowchart
+![Flowchart](assets/img/gRPC_Flowchart.png "Flowchart")
 
 ## Development
 Generate self signed cert/key pair
