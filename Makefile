@@ -11,28 +11,28 @@ CERT_OUT := $(BINARY_LOCATION)/test.crt
 
 all: build_hub build_server build_client
 
-pb/remote/fluentd.pb.go: $(PB_LOCATION)/remote/fluentd.proto
-	@protoc -I $(PB_LOCATION)/remote \
+fluentd/fluentd.pb.go: $(PB_LOCATION)/remote/fluentd/fluentd.proto
+	@protoc -I $(PB_LOCATION)/remote/fluentd \
 			-I ${GOPATH}/src \
-			--go_out=plugins=grpc:$(PB_LOCATION)/remote \
+			--go_out=plugins=grpc:$(PB_LOCATION)/remote/fluentd \
 			--go_opt=paths=source_relative \
-			$(PB_LOCATION)/remote/fluentd.proto
-pb/remote/systemd.pb.go: $(PB_LOCATION)/remote/systemd.proto
-	@protoc -I $(PB_LOCATION)/remote \
+			$(PB_LOCATION)/remote/fluentd/fluentd.proto
+systemd/systemd.pb.go: $(PB_LOCATION)/remote/systemd/systemd.proto
+	@protoc -I $(PB_LOCATION)/remote/systemd \
 			-I ${GOPATH}/src \
-			--go_out=plugins=grpc:$(PB_LOCATION)/remote \
+			--go_out=plugins=grpc:$(PB_LOCATION)/remote/systemd \
 			--go_opt=paths=source_relative \
-			$(PB_LOCATION)/remote/systemd.proto
-pb/local/hub.pb.go: $(PB_LOCATION)/local/hub.proto
-	@protoc -I $(PB_LOCATION)/local \
+			$(PB_LOCATION)/remote/systemd/systemd.proto
+hub/hub.pb.go: $(PB_LOCATION)/local/hub/hub.proto
+	@protoc -I $(PB_LOCATION)/local/hub \
 			-I ${GOPATH}/src \
-			--go_out=plugins=grpc:$(PB_LOCATION)/local \
+			--go_out=plugins=grpc:$(PB_LOCATION)/local/hub \
 			--go_opt=paths=source_relative \
-			$(PB_LOCATION)/local/hub.proto
+			$(PB_LOCATION)/local/hub/hub.proto
 
-pb: pb/remote/fluentd.pb.go \
-	pb/remote/systemd.pb.go \
-	pb/local/hub.pb.go  ## compile protocol buffers
+pb: fluentd/fluentd.pb.go \
+	systemd/systemd.pb.go \
+	hub/hub.pb.go  ## compile protocol buffers
 
 dep: ## Get dependencies
 	@go get -v -d ./...

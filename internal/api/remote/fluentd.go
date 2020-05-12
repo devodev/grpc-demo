@@ -3,7 +3,7 @@ package remote
 import (
 	"context"
 
-	pb "github.com/devodev/grpc-demo/internal/pb/remote"
+	pb "github.com/devodev/grpc-demo/internal/pb/remote/fluentd"
 	"google.golang.org/grpc"
 )
 
