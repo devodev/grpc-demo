@@ -3,7 +3,7 @@ package systemd
 import (
 	context "context"
 
-	"github.com/coreos/go-systemd/dbus"
+	"github.com/coreos/go-systemd/v22/dbus"
 	grpc "google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

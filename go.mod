@@ -3,8 +3,7 @@ module github.com/devodev/grpc-demo
 go 1.13
 
 require (
-	github.com/coreos/go-systemd v0.0.0-20191104093116-d3cd4ed1dbcf // indirect
-	github.com/godbus/dbus v4.1.0+incompatible // indirect
+	github.com/coreos/go-systemd/v22 v22.0.0
 	github.com/golang/protobuf v1.4.1
 	github.com/gorilla/websocket v1.4.2
 	github.com/hashicorp/yamux v0.0.0-20190923154419-df201c70410d
