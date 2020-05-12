@@ -9,8 +9,8 @@ import (
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 
-	api "github.com/devodev/grpc-demo/internal/api/remote"
 	"github.com/devodev/grpc-demo/internal/hub"
+	"github.com/devodev/grpc-demo/internal/server/pb/fluentd"
 )
 
 // Config holds config for the Fluentd command.
@@ -54,7 +54,7 @@ func newCommandServe() *cobra.Command {
 			signal.Notify(interrupt, os.Interrupt)
 
 			server := grpc.NewServer()
-			fluentdService := &api.FluentdService{}
+			fluentdService := &fluentd.Service{}
 			fluentdService.RegisterServer(server)
 
 			go func() {

@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/devodev/grpc-demo/cmd/client/grpc"
-	pb "github.com/devodev/grpc-demo/internal/pb/remote"
+	"github.com/devodev/grpc-demo/internal/server/pb/fluentd"
 
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc/metadata"
@@ -45,9 +45,9 @@ func newCommandFluentdStart() *cobra.Command {
 				return err
 			}
 			defer conn.Close()
-			client := pb.NewFluentdClient(conn)
+			client := fluentd.NewFluentdClient(conn)
 
-			var v pb.FluentdStartRequest
+			var v fluentd.FluentdStartRequest
 			fn := client.Start
 
 			// get encoder and decoder
@@ -98,9 +98,9 @@ func newCommandFluentdStop() *cobra.Command {
 				return err
 			}
 			defer conn.Close()
-			client := pb.NewFluentdClient(conn)
+			client := fluentd.NewFluentdClient(conn)
 
-			var v pb.FluentdStopRequest
+			var v fluentd.FluentdStopRequest
 			fn := client.Stop
 			return config.RoundTrip(func(cfg *grpc.Config, in grpc.Decoder, out grpc.Encoder) error {
 				if cfg.PrintSampleRequest {
@@ -142,9 +142,9 @@ func newCommandFluentdRestart() *cobra.Command {
 				return err
 			}
 			defer conn.Close()
-			client := pb.NewFluentdClient(conn)
+			client := fluentd.NewFluentdClient(conn)
 
-			var v pb.FluentdRestartRequest
+			var v fluentd.FluentdRestartRequest
 			fn := client.Restart
 			return config.RoundTrip(func(cfg *grpc.Config, in grpc.Decoder, out grpc.Encoder) error {
 				if cfg.PrintSampleRequest {

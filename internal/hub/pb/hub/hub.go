@@ -1,4 +1,4 @@
-package local
+package hub
 
 import (
 	"context"
@@ -6,51 +6,50 @@ import (
 
 	"github.com/devodev/grpc-demo/internal/client"
 	"github.com/devodev/grpc-demo/internal/feed"
-	pb "github.com/devodev/grpc-demo/internal/pb/local/hub"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-// HubService implements pb.Hub.
-type HubService struct {
+// Service implements Hub.
+type Service struct {
 	Registry     client.Registry
 	ActivityFeed *feed.Feed
 }
 
 // RegisterServer resgisters itself to a grpc server.
-func (s *HubService) RegisterServer(server *grpc.Server) {
-	pb.RegisterHubServer(server, s)
+func (s *Service) RegisterServer(server *grpc.Server) {
+	RegisterHubServer(server, s)
 }
 
 // ListClients returns the list of clients currently connected to the hub, as well as the total count.
-func (s *HubService) ListClients(ctx context.Context, r *pb.HubListClientsRequest) (*pb.HubListClientsResponse, error) {
+func (s *Service) ListClients(ctx context.Context, r *HubListClientsRequest) (*HubListClientsResponse, error) {
 	now := time.Now()
 
 	clientList := s.Registry.List()
 
-	var clients []*pb.Client
+	var clients []*Client
 	for _, client := range clientList {
 		cclient := client
-		c := &pb.Client{
+		c := &Client{
 			Name:           cclient.Name,
 			ConnectionTime: cclient.ConnectionTime.String(),
 			Uptime:         now.Sub(cclient.ConnectionTime).String(),
 		}
 		clients = append(clients, c)
 	}
-	return &pb.HubListClientsResponse{Count: int64(len(clients)), Clients: clients}, nil
+	return &HubListClientsResponse{Count: int64(len(clients)), Clients: clients}, nil
 }
 
 // StreamActivityFeed returns a stream of ActivityEvent.
-func (s *HubService) StreamActivityFeed(req *pb.HubActivityFeedRequest, server pb.Hub_StreamActivityFeedServer) error {
+func (s *Service) StreamActivityFeed(req *HubActivityFeedRequest, server Hub_StreamActivityFeedServer) error {
 	quit := make(chan struct{})
 	defer close(quit)
 
 	ch := s.ActivityFeed.GetCh(quit)
 	for message := range ch {
-		if err := server.Send(&pb.ActivityEvent{Message: message}); err != nil {
+		if err := server.Send(&ActivityEvent{Message: message}); err != nil {
 			return status.Errorf(codes.Aborted, "error: %v", err)
 		}
 	}

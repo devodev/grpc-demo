@@ -14,9 +14,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	api "github.com/devodev/grpc-demo/internal/api/local"
 	"github.com/devodev/grpc-demo/internal/client"
 	"github.com/devodev/grpc-demo/internal/feed"
+	"github.com/devodev/grpc-demo/internal/hub/pb/hub"
 	ws "github.com/devodev/grpc-demo/internal/websocket"
 
 	"github.com/gorilla/websocket"
@@ -205,7 +205,9 @@ func (h *Hub) listenAndServeGRPC() {
 		if strings.HasPrefix(fullMethodName, "/internal.") {
 			return nil, nil, grpc.Errorf(codes.Unimplemented, "Unknown method")
 		}
-		if strings.HasPrefix(fullMethodName, "/external.") {
+		// TODO: Find a way to filter methodname for any server services/
+		// TODO: Maybe use a map that will need to be maintained?
+		if strings.HasPrefix(fullMethodName, "/fluentd.") || strings.HasPrefix(fullMethodName, "/systemd.") {
 			md, ok := metadata.FromIncomingContext(ctx)
 			if !ok {
 				return nil, nil, grpc.Errorf(codes.FailedPrecondition, "no metadata provided")
@@ -236,7 +238,7 @@ func (h *Hub) listenAndServeGRPC() {
 		grpc.CustomCodec(proxy.Codec()),
 		grpc.UnknownServiceHandler(proxy.TransparentHandler(director)),
 	)
-	hubService := &api.HubService{Registry: h.ClientRegistry, ActivityFeed: h.activityFeed}
+	hubService := &hub.Service{Registry: h.ClientRegistry, ActivityFeed: h.activityFeed}
 	hubService.RegisterServer(server)
 
 	go func() {

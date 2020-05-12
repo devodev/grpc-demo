@@ -1,8 +1,10 @@
 HUB_LOCATION := ./cmd/hub
 SERVER_LOCATION := ./cmd/server
 CLIENT_LOCATION := ./cmd/client
-PB_LOCATION := ./internal/pb
 BINARY_LOCATION := ./bin
+
+HUB_PB := ./internal/hub/pb
+SERVER_PB := ./internal/server/pb
 
 KEY_OUT := $(BINARY_LOCATION)/test.key
 CERT_OUT := $(BINARY_LOCATION)/test.crt
@@ -11,24 +13,24 @@ CERT_OUT := $(BINARY_LOCATION)/test.crt
 
 all: build_hub build_server build_client
 
-fluentd/fluentd.pb.go: $(PB_LOCATION)/remote/fluentd/fluentd.proto
-	@protoc -I $(PB_LOCATION)/remote/fluentd \
+fluentd/fluentd.pb.go: $(SERVER_PB)/fluentd/fluentd.proto
+	@protoc -I $(SERVER_PB)/fluentd \
 			-I ${GOPATH}/src \
-			--go_out=plugins=grpc:$(PB_LOCATION)/remote/fluentd \
+			--go_out=plugins=grpc:$(SERVER_PB)/fluentd \
 			--go_opt=paths=source_relative \
-			$(PB_LOCATION)/remote/fluentd/fluentd.proto
-systemd/systemd.pb.go: $(PB_LOCATION)/remote/systemd/systemd.proto
-	@protoc -I $(PB_LOCATION)/remote/systemd \
+			$(SERVER_PB)/fluentd/fluentd.proto
+systemd/systemd.pb.go: $(SERVER_PB)/systemd/systemd.proto
+	@protoc -I $(SERVER_PB)/systemd \
 			-I ${GOPATH}/src \
-			--go_out=plugins=grpc:$(PB_LOCATION)/remote/systemd \
+			--go_out=plugins=grpc:$(SERVER_PB)/systemd \
 			--go_opt=paths=source_relative \
-			$(PB_LOCATION)/remote/systemd/systemd.proto
-hub/hub.pb.go: $(PB_LOCATION)/local/hub/hub.proto
-	@protoc -I $(PB_LOCATION)/local/hub \
+			$(SERVER_PB)/systemd/systemd.proto
+hub/hub.pb.go: $(HUB_PB)/hub/hub.proto
+	@protoc -I $(HUB_PB)/hub \
 			-I ${GOPATH}/src \
-			--go_out=plugins=grpc:$(PB_LOCATION)/local/hub \
+			--go_out=plugins=grpc:$(HUB_PB)/hub \
 			--go_opt=paths=source_relative \
-			$(PB_LOCATION)/local/hub/hub.proto
+			$(HUB_PB)/hub/hub.proto
 
 pb: fluentd/fluentd.pb.go \
 	systemd/systemd.pb.go \

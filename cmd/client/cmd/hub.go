@@ -5,7 +5,7 @@ import (
 	"io"
 
 	"github.com/devodev/grpc-demo/cmd/client/grpc"
-	pb "github.com/devodev/grpc-demo/internal/pb/local"
+	"github.com/devodev/grpc-demo/internal/hub/pb/hub"
 
 	"github.com/spf13/cobra"
 )
@@ -39,9 +39,9 @@ func newCommandHubListClients() *cobra.Command {
 				return err
 			}
 			defer conn.Close()
-			hubClient := pb.NewHubClient(conn)
+			hubClient := hub.NewHubClient(conn)
 
-			var v pb.HubListClientsRequest
+			var v hub.HubListClientsRequest
 			fn := hubClient.ListClients
 
 			return config.RoundTrip(func(cfg *grpc.Config, in grpc.Decoder, out grpc.Encoder) error {
@@ -84,9 +84,9 @@ func newCommandHubActivityFeed() *cobra.Command {
 				return err
 			}
 			defer conn.Close()
-			hubClient := pb.NewHubClient(conn)
+			hubClient := hub.NewHubClient(conn)
 
-			var v pb.HubActivityFeedRequest
+			var v hub.HubActivityFeedRequest
 			fn := hubClient.StreamActivityFeed
 
 			return config.RoundTrip(func(cfg *grpc.Config, in grpc.Decoder, out grpc.Encoder) error {
@@ -102,7 +102,7 @@ func newCommandHubActivityFeed() *cobra.Command {
 				}
 				defer feed.CloseSend()
 
-				var message pb.ActivityEvent
+				var message hub.ActivityEvent
 				for {
 					if err := feed.RecvMsg(&message); err != nil {
 						if err == io.EOF {
