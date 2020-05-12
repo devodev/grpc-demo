@@ -11,67 +11,121 @@ service Systemd {
     rpc Enable (SystemdEnableRequest) returns (SystemdEnableResponse);
     rpc Disable (SystemdDisableRequest) returns (SystemdDisableResponse);
     rpc Start (SystemdStartRequest) returns (SystemdStartResponse);
+    rpc Stop (SystemdStopRequest) returns (SystemdStopResponse);
     rpc Restart (SystemdRestartRequest) returns (SystemdRestartResponse);
     rpc Reload (SystemdReloadRequest) returns (SystemdReloadResponse);
-    rpc Stop (SystemdStopRequest) returns (SystemdStopResponse);
     rpc Kill (SystemdKillRequest) returns (SystemdKillResponse);
+}
+
+message UnitFile {
+    string path = 1;
+    string type = 2;
+}
+
+message UnitStatus {
+    string name = 1;
+	string description = 2;
+	string loadState = 3;
+	string activeState = 4;
+	string subState = 5;
+	string followed = 6;
+	string path = 7;
+	int32 jobId = 8;
+	string jobType = 9;
+	string jobPath = 10;
+}
+
+message UnitFileChange {
+    string type = 1;
+	string filename = 2;
+	string destination = 3;
 }
 
 message SystemdListUnitsRequest {
 }
 
 message SystemdListUnitsResponse {
+    repeated UnitFile units = 1;
 }
 
 message SystemdStatusRequest {
+    string unitName = 1;
 }
 
 message SystemdStatusResponse {
+    UnitStatus status = 1;
 }
 
 message SystemdListStatusRequest {
 }
 
 message SystemdListStatusResponse {
+    repeated UnitStatus statuses = 1;
 }
 
 message SystemdEnableRequest {
+    string unitName = 1;
+    bool runtime = 2;
+    bool force = 3;
 }
 
 message SystemdEnableResponse {
+    bool hadEnablement = 1;
+    repeated UnitFileChange changes = 2;
 }
 
 message SystemdDisableRequest {
+    string unitName = 1;
+    bool runtime = 2;
 }
 
 message SystemdDisableResponse {
+    repeated UnitFileChange changes = 1;
 }
 
 message SystemdStartRequest {
+    string unitName = 1;
+    string mode = 2;
 }
 
 message SystemdStartResponse {
-}
-
-message SystemdRestartRequest {
-}
-
-message SystemdRestartResponse {
-}
-
-message SystemdReloadRequest {
-}
-
-message SystemdReloadResponse {
+    string result = 1;
+    int64 jobID = 2;
 }
 
 message SystemdStopRequest {
+    string unitName = 1;
+    string mode = 2;
 }
 
 message SystemdStopResponse {
+    string result = 1;
+    int64 jobID = 2;
+}
+
+message SystemdRestartRequest {
+    string unitName = 1;
+    string mode = 2;
+}
+
+message SystemdRestartResponse {
+    string result = 1;
+    int64 jobID = 2;
+}
+
+message SystemdReloadRequest {
+    string unitName = 1;
+    string mode = 2;
+}
+
+message SystemdReloadResponse {
+    string result = 1;
+    int64 jobID = 2;
 }
 
 message SystemdKillRequest {
+    string unitName = 1;
+    int32 signal = 2;
 }
 
 message SystemdKillResponse {

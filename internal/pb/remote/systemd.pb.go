@@ -29,6 +29,243 @@ const (
 // of the legacy proto package is being used.
 const _ = proto.ProtoPackageIsVersion4
 
+type UnitFile struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Path string `protobuf:"bytes,1,opt,name=path,proto3" json:"path,omitempty"`
+	Type string `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
+}
+
+func (x *UnitFile) Reset() {
+	*x = UnitFile{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_systemd_proto_msgTypes[0]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *UnitFile) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UnitFile) ProtoMessage() {}
+
+func (x *UnitFile) ProtoReflect() protoreflect.Message {
+	mi := &file_systemd_proto_msgTypes[0]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UnitFile.ProtoReflect.Descriptor instead.
+func (*UnitFile) Descriptor() ([]byte, []int) {
+	return file_systemd_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *UnitFile) GetPath() string {
+	if x != nil {
+		return x.Path
+	}
+	return ""
+}
+
+func (x *UnitFile) GetType() string {
+	if x != nil {
+		return x.Type
+	}
+	return ""
+}
+
+type UnitStatus struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Name        string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Description string `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	LoadState   string `protobuf:"bytes,3,opt,name=loadState,proto3" json:"loadState,omitempty"`
+	ActiveState string `protobuf:"bytes,4,opt,name=activeState,proto3" json:"activeState,omitempty"`
+	SubState    string `protobuf:"bytes,5,opt,name=subState,proto3" json:"subState,omitempty"`
+	Followed    string `protobuf:"bytes,6,opt,name=followed,proto3" json:"followed,omitempty"`
+	Path        string `protobuf:"bytes,7,opt,name=path,proto3" json:"path,omitempty"`
+	JobId       int32  `protobuf:"varint,8,opt,name=jobId,proto3" json:"jobId,omitempty"`
+	JobType     string `protobuf:"bytes,9,opt,name=jobType,proto3" json:"jobType,omitempty"`
+	JobPath     string `protobuf:"bytes,10,opt,name=jobPath,proto3" json:"jobPath,omitempty"`
+}
+
+func (x *UnitStatus) Reset() {
+	*x = UnitStatus{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_systemd_proto_msgTypes[1]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *UnitStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UnitStatus) ProtoMessage() {}
+
+func (x *UnitStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_systemd_proto_msgTypes[1]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UnitStatus.ProtoReflect.Descriptor instead.
+func (*UnitStatus) Descriptor() ([]byte, []int) {
+	return file_systemd_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *UnitStatus) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *UnitStatus) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *UnitStatus) GetLoadState() string {
+	if x != nil {
+		return x.LoadState
+	}
+	return ""
+}
+
+func (x *UnitStatus) GetActiveState() string {
+	if x != nil {
+		return x.ActiveState
+	}
+	return ""
+}
+
+func (x *UnitStatus) GetSubState() string {
+	if x != nil {
+		return x.SubState
+	}
+	return ""
+}
+
+func (x *UnitStatus) GetFollowed() string {
+	if x != nil {
+		return x.Followed
+	}
+	return ""
+}
+
+func (x *UnitStatus) GetPath() string {
+	if x != nil {
+		return x.Path
+	}
+	return ""
+}
+
+func (x *UnitStatus) GetJobId() int32 {
+	if x != nil {
+		return x.JobId
+	}
+	return 0
+}
+
+func (x *UnitStatus) GetJobType() string {
+	if x != nil {
+		return x.JobType
+	}
+	return ""
+}
+
+func (x *UnitStatus) GetJobPath() string {
+	if x != nil {
+		return x.JobPath
+	}
+	return ""
+}
+
+type UnitFileChange struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Type        string `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"`
+	Filename    string `protobuf:"bytes,2,opt,name=filename,proto3" json:"filename,omitempty"`
+	Destination string `protobuf:"bytes,3,opt,name=destination,proto3" json:"destination,omitempty"`
+}
+
+func (x *UnitFileChange) Reset() {
+	*x = UnitFileChange{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_systemd_proto_msgTypes[2]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *UnitFileChange) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UnitFileChange) ProtoMessage() {}
+
+func (x *UnitFileChange) ProtoReflect() protoreflect.Message {
+	mi := &file_systemd_proto_msgTypes[2]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UnitFileChange.ProtoReflect.Descriptor instead.
+func (*UnitFileChange) Descriptor() ([]byte, []int) {
+	return file_systemd_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *UnitFileChange) GetType() string {
+	if x != nil {
+		return x.Type
+	}
+	return ""
+}
+
+func (x *UnitFileChange) GetFilename() string {
+	if x != nil {
+		return x.Filename
+	}
+	return ""
+}
+
+func (x *UnitFileChange) GetDestination() string {
+	if x != nil {
+		return x.Destination
+	}
+	return ""
+}
+
 type SystemdListUnitsRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -38,7 +275,7 @@ type SystemdListUnitsRequest struct {
 func (x *SystemdListUnitsRequest) Reset() {
 	*x = SystemdListUnitsRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_systemd_proto_msgTypes[0]
+		mi := &file_systemd_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -51,7 +288,7 @@ func (x *SystemdListUnitsRequest) String() string {
 func (*SystemdListUnitsRequest) ProtoMessage() {}
 
 func (x *SystemdListUnitsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_systemd_proto_msgTypes[0]
+	mi := &file_systemd_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -64,19 +301,21 @@ func (x *SystemdListUnitsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SystemdListUnitsRequest.ProtoReflect.Descriptor instead.
 func (*SystemdListUnitsRequest) Descriptor() ([]byte, []int) {
-	return file_systemd_proto_rawDescGZIP(), []int{0}
+	return file_systemd_proto_rawDescGZIP(), []int{3}
 }
 
 type SystemdListUnitsResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
+
+	Units []*UnitFile `protobuf:"bytes,1,rep,name=units,proto3" json:"units,omitempty"`
 }
 
 func (x *SystemdListUnitsResponse) Reset() {
 	*x = SystemdListUnitsResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_systemd_proto_msgTypes[1]
+		mi := &file_systemd_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -89,7 +328,7 @@ func (x *SystemdListUnitsResponse) String() string {
 func (*SystemdListUnitsResponse) ProtoMessage() {}
 
 func (x *SystemdListUnitsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_systemd_proto_msgTypes[1]
+	mi := &file_systemd_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -102,19 +341,28 @@ func (x *SystemdListUnitsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SystemdListUnitsResponse.ProtoReflect.Descriptor instead.
 func (*SystemdListUnitsResponse) Descriptor() ([]byte, []int) {
-	return file_systemd_proto_rawDescGZIP(), []int{1}
+	return file_systemd_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *SystemdListUnitsResponse) GetUnits() []*UnitFile {
+	if x != nil {
+		return x.Units
+	}
+	return nil
 }
 
 type SystemdStatusRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
+
+	UnitName string `protobuf:"bytes,1,opt,name=unitName,proto3" json:"unitName,omitempty"`
 }
 
 func (x *SystemdStatusRequest) Reset() {
 	*x = SystemdStatusRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_systemd_proto_msgTypes[2]
+		mi := &file_systemd_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -127,7 +375,7 @@ func (x *SystemdStatusRequest) String() string {
 func (*SystemdStatusRequest) ProtoMessage() {}
 
 func (x *SystemdStatusRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_systemd_proto_msgTypes[2]
+	mi := &file_systemd_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -140,19 +388,28 @@ func (x *SystemdStatusRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SystemdStatusRequest.ProtoReflect.Descriptor instead.
 func (*SystemdStatusRequest) Descriptor() ([]byte, []int) {
-	return file_systemd_proto_rawDescGZIP(), []int{2}
+	return file_systemd_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *SystemdStatusRequest) GetUnitName() string {
+	if x != nil {
+		return x.UnitName
+	}
+	return ""
 }
 
 type SystemdStatusResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
+
+	Status *UnitStatus `protobuf:"bytes,1,opt,name=status,proto3" json:"status,omitempty"`
 }
 
 func (x *SystemdStatusResponse) Reset() {
 	*x = SystemdStatusResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_systemd_proto_msgTypes[3]
+		mi := &file_systemd_proto_msgTypes[6]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -165,7 +422,7 @@ func (x *SystemdStatusResponse) String() string {
 func (*SystemdStatusResponse) ProtoMessage() {}
 
 func (x *SystemdStatusResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_systemd_proto_msgTypes[3]
+	mi := &file_systemd_proto_msgTypes[6]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -178,7 +435,14 @@ func (x *SystemdStatusResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SystemdStatusResponse.ProtoReflect.Descriptor instead.
 func (*SystemdStatusResponse) Descriptor() ([]byte, []int) {
-	return file_systemd_proto_rawDescGZIP(), []int{3}
+	return file_systemd_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *SystemdStatusResponse) GetStatus() *UnitStatus {
+	if x != nil {
+		return x.Status
+	}
+	return nil
 }
 
 type SystemdListStatusRequest struct {
@@ -190,7 +454,7 @@ type SystemdListStatusRequest struct {
 func (x *SystemdListStatusRequest) Reset() {
 	*x = SystemdListStatusRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_systemd_proto_msgTypes[4]
+		mi := &file_systemd_proto_msgTypes[7]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -203,7 +467,7 @@ func (x *SystemdListStatusRequest) String() string {
 func (*SystemdListStatusRequest) ProtoMessage() {}
 
 func (x *SystemdListStatusRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_systemd_proto_msgTypes[4]
+	mi := &file_systemd_proto_msgTypes[7]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -216,19 +480,21 @@ func (x *SystemdListStatusRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SystemdListStatusRequest.ProtoReflect.Descriptor instead.
 func (*SystemdListStatusRequest) Descriptor() ([]byte, []int) {
-	return file_systemd_proto_rawDescGZIP(), []int{4}
+	return file_systemd_proto_rawDescGZIP(), []int{7}
 }
 
 type SystemdListStatusResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
+
+	Statuses []*UnitStatus `protobuf:"bytes,1,rep,name=statuses,proto3" json:"statuses,omitempty"`
 }
 
 func (x *SystemdListStatusResponse) Reset() {
 	*x = SystemdListStatusResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_systemd_proto_msgTypes[5]
+		mi := &file_systemd_proto_msgTypes[8]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -241,7 +507,7 @@ func (x *SystemdListStatusResponse) String() string {
 func (*SystemdListStatusResponse) ProtoMessage() {}
 
 func (x *SystemdListStatusResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_systemd_proto_msgTypes[5]
+	mi := &file_systemd_proto_msgTypes[8]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -254,19 +520,30 @@ func (x *SystemdListStatusResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SystemdListStatusResponse.ProtoReflect.Descriptor instead.
 func (*SystemdListStatusResponse) Descriptor() ([]byte, []int) {
-	return file_systemd_proto_rawDescGZIP(), []int{5}
+	return file_systemd_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *SystemdListStatusResponse) GetStatuses() []*UnitStatus {
+	if x != nil {
+		return x.Statuses
+	}
+	return nil
 }
 
 type SystemdEnableRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
+
+	UnitName string `protobuf:"bytes,1,opt,name=unitName,proto3" json:"unitName,omitempty"`
+	Runtime  bool   `protobuf:"varint,2,opt,name=runtime,proto3" json:"runtime,omitempty"`
+	Force    bool   `protobuf:"varint,3,opt,name=force,proto3" json:"force,omitempty"`
 }
 
 func (x *SystemdEnableRequest) Reset() {
 	*x = SystemdEnableRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_systemd_proto_msgTypes[6]
+		mi := &file_systemd_proto_msgTypes[9]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -279,7 +556,7 @@ func (x *SystemdEnableRequest) String() string {
 func (*SystemdEnableRequest) ProtoMessage() {}
 
 func (x *SystemdEnableRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_systemd_proto_msgTypes[6]
+	mi := &file_systemd_proto_msgTypes[9]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -292,19 +569,43 @@ func (x *SystemdEnableRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SystemdEnableRequest.ProtoReflect.Descriptor instead.
 func (*SystemdEnableRequest) Descriptor() ([]byte, []int) {
-	return file_systemd_proto_rawDescGZIP(), []int{6}
+	return file_systemd_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *SystemdEnableRequest) GetUnitName() string {
+	if x != nil {
+		return x.UnitName
+	}
+	return ""
+}
+
+func (x *SystemdEnableRequest) GetRuntime() bool {
+	if x != nil {
+		return x.Runtime
+	}
+	return false
+}
+
+func (x *SystemdEnableRequest) GetForce() bool {
+	if x != nil {
+		return x.Force
+	}
+	return false
 }
 
 type SystemdEnableResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
+
+	HadEnablement bool              `protobuf:"varint,1,opt,name=hadEnablement,proto3" json:"hadEnablement,omitempty"`
+	Changes       []*UnitFileChange `protobuf:"bytes,2,rep,name=changes,proto3" json:"changes,omitempty"`
 }
 
 func (x *SystemdEnableResponse) Reset() {
 	*x = SystemdEnableResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_systemd_proto_msgTypes[7]
+		mi := &file_systemd_proto_msgTypes[10]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -317,7 +618,7 @@ func (x *SystemdEnableResponse) String() string {
 func (*SystemdEnableResponse) ProtoMessage() {}
 
 func (x *SystemdEnableResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_systemd_proto_msgTypes[7]
+	mi := &file_systemd_proto_msgTypes[10]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -330,19 +631,36 @@ func (x *SystemdEnableResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SystemdEnableResponse.ProtoReflect.Descriptor instead.
 func (*SystemdEnableResponse) Descriptor() ([]byte, []int) {
-	return file_systemd_proto_rawDescGZIP(), []int{7}
+	return file_systemd_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *SystemdEnableResponse) GetHadEnablement() bool {
+	if x != nil {
+		return x.HadEnablement
+	}
+	return false
+}
+
+func (x *SystemdEnableResponse) GetChanges() []*UnitFileChange {
+	if x != nil {
+		return x.Changes
+	}
+	return nil
 }
 
 type SystemdDisableRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
+
+	UnitName string `protobuf:"bytes,1,opt,name=unitName,proto3" json:"unitName,omitempty"`
+	Runtime  bool   `protobuf:"varint,2,opt,name=runtime,proto3" json:"runtime,omitempty"`
 }
 
 func (x *SystemdDisableRequest) Reset() {
 	*x = SystemdDisableRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_systemd_proto_msgTypes[8]
+		mi := &file_systemd_proto_msgTypes[11]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -355,7 +673,7 @@ func (x *SystemdDisableRequest) String() string {
 func (*SystemdDisableRequest) ProtoMessage() {}
 
 func (x *SystemdDisableRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_systemd_proto_msgTypes[8]
+	mi := &file_systemd_proto_msgTypes[11]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -368,19 +686,35 @@ func (x *SystemdDisableRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SystemdDisableRequest.ProtoReflect.Descriptor instead.
 func (*SystemdDisableRequest) Descriptor() ([]byte, []int) {
-	return file_systemd_proto_rawDescGZIP(), []int{8}
+	return file_systemd_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *SystemdDisableRequest) GetUnitName() string {
+	if x != nil {
+		return x.UnitName
+	}
+	return ""
+}
+
+func (x *SystemdDisableRequest) GetRuntime() bool {
+	if x != nil {
+		return x.Runtime
+	}
+	return false
 }
 
 type SystemdDisableResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
+
+	Changes []*UnitFileChange `protobuf:"bytes,1,rep,name=changes,proto3" json:"changes,omitempty"`
 }
 
 func (x *SystemdDisableResponse) Reset() {
 	*x = SystemdDisableResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_systemd_proto_msgTypes[9]
+		mi := &file_systemd_proto_msgTypes[12]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -393,7 +727,7 @@ func (x *SystemdDisableResponse) String() string {
 func (*SystemdDisableResponse) ProtoMessage() {}
 
 func (x *SystemdDisableResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_systemd_proto_msgTypes[9]
+	mi := &file_systemd_proto_msgTypes[12]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -406,19 +740,29 @@ func (x *SystemdDisableResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SystemdDisableResponse.ProtoReflect.Descriptor instead.
 func (*SystemdDisableResponse) Descriptor() ([]byte, []int) {
-	return file_systemd_proto_rawDescGZIP(), []int{9}
+	return file_systemd_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *SystemdDisableResponse) GetChanges() []*UnitFileChange {
+	if x != nil {
+		return x.Changes
+	}
+	return nil
 }
 
 type SystemdStartRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
+
+	UnitName string `protobuf:"bytes,1,opt,name=unitName,proto3" json:"unitName,omitempty"`
+	Mode     string `protobuf:"bytes,2,opt,name=mode,proto3" json:"mode,omitempty"`
 }
 
 func (x *SystemdStartRequest) Reset() {
 	*x = SystemdStartRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_systemd_proto_msgTypes[10]
+		mi := &file_systemd_proto_msgTypes[13]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -431,7 +775,7 @@ func (x *SystemdStartRequest) String() string {
 func (*SystemdStartRequest) ProtoMessage() {}
 
 func (x *SystemdStartRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_systemd_proto_msgTypes[10]
+	mi := &file_systemd_proto_msgTypes[13]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -444,19 +788,36 @@ func (x *SystemdStartRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SystemdStartRequest.ProtoReflect.Descriptor instead.
 func (*SystemdStartRequest) Descriptor() ([]byte, []int) {
-	return file_systemd_proto_rawDescGZIP(), []int{10}
+	return file_systemd_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *SystemdStartRequest) GetUnitName() string {
+	if x != nil {
+		return x.UnitName
+	}
+	return ""
+}
+
+func (x *SystemdStartRequest) GetMode() string {
+	if x != nil {
+		return x.Mode
+	}
+	return ""
 }
 
 type SystemdStartResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
+
+	Result string `protobuf:"bytes,1,opt,name=result,proto3" json:"result,omitempty"`
+	JobID  int64  `protobuf:"varint,2,opt,name=jobID,proto3" json:"jobID,omitempty"`
 }
 
 func (x *SystemdStartResponse) Reset() {
 	*x = SystemdStartResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_systemd_proto_msgTypes[11]
+		mi := &file_systemd_proto_msgTypes[14]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -469,7 +830,7 @@ func (x *SystemdStartResponse) String() string {
 func (*SystemdStartResponse) ProtoMessage() {}
 
 func (x *SystemdStartResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_systemd_proto_msgTypes[11]
+	mi := &file_systemd_proto_msgTypes[14]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -482,171 +843,36 @@ func (x *SystemdStartResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SystemdStartResponse.ProtoReflect.Descriptor instead.
 func (*SystemdStartResponse) Descriptor() ([]byte, []int) {
-	return file_systemd_proto_rawDescGZIP(), []int{11}
-}
-
-type SystemdRestartRequest struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-}
-
-func (x *SystemdRestartRequest) Reset() {
-	*x = SystemdRestartRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_systemd_proto_msgTypes[12]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *SystemdRestartRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SystemdRestartRequest) ProtoMessage() {}
-
-func (x *SystemdRestartRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_systemd_proto_msgTypes[12]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SystemdRestartRequest.ProtoReflect.Descriptor instead.
-func (*SystemdRestartRequest) Descriptor() ([]byte, []int) {
-	return file_systemd_proto_rawDescGZIP(), []int{12}
-}
-
-type SystemdRestartResponse struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-}
-
-func (x *SystemdRestartResponse) Reset() {
-	*x = SystemdRestartResponse{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_systemd_proto_msgTypes[13]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *SystemdRestartResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SystemdRestartResponse) ProtoMessage() {}
-
-func (x *SystemdRestartResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_systemd_proto_msgTypes[13]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SystemdRestartResponse.ProtoReflect.Descriptor instead.
-func (*SystemdRestartResponse) Descriptor() ([]byte, []int) {
-	return file_systemd_proto_rawDescGZIP(), []int{13}
-}
-
-type SystemdReloadRequest struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-}
-
-func (x *SystemdReloadRequest) Reset() {
-	*x = SystemdReloadRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_systemd_proto_msgTypes[14]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *SystemdReloadRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SystemdReloadRequest) ProtoMessage() {}
-
-func (x *SystemdReloadRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_systemd_proto_msgTypes[14]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SystemdReloadRequest.ProtoReflect.Descriptor instead.
-func (*SystemdReloadRequest) Descriptor() ([]byte, []int) {
 	return file_systemd_proto_rawDescGZIP(), []int{14}
 }
 
-type SystemdReloadResponse struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-}
-
-func (x *SystemdReloadResponse) Reset() {
-	*x = SystemdReloadResponse{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_systemd_proto_msgTypes[15]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
+func (x *SystemdStartResponse) GetResult() string {
+	if x != nil {
+		return x.Result
 	}
+	return ""
 }
 
-func (x *SystemdReloadResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SystemdReloadResponse) ProtoMessage() {}
-
-func (x *SystemdReloadResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_systemd_proto_msgTypes[15]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
+func (x *SystemdStartResponse) GetJobID() int64 {
+	if x != nil {
+		return x.JobID
 	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SystemdReloadResponse.ProtoReflect.Descriptor instead.
-func (*SystemdReloadResponse) Descriptor() ([]byte, []int) {
-	return file_systemd_proto_rawDescGZIP(), []int{15}
+	return 0
 }
 
 type SystemdStopRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
+
+	UnitName string `protobuf:"bytes,1,opt,name=unitName,proto3" json:"unitName,omitempty"`
+	Mode     string `protobuf:"bytes,2,opt,name=mode,proto3" json:"mode,omitempty"`
 }
 
 func (x *SystemdStopRequest) Reset() {
 	*x = SystemdStopRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_systemd_proto_msgTypes[16]
+		mi := &file_systemd_proto_msgTypes[15]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -659,7 +885,7 @@ func (x *SystemdStopRequest) String() string {
 func (*SystemdStopRequest) ProtoMessage() {}
 
 func (x *SystemdStopRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_systemd_proto_msgTypes[16]
+	mi := &file_systemd_proto_msgTypes[15]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -672,19 +898,36 @@ func (x *SystemdStopRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SystemdStopRequest.ProtoReflect.Descriptor instead.
 func (*SystemdStopRequest) Descriptor() ([]byte, []int) {
-	return file_systemd_proto_rawDescGZIP(), []int{16}
+	return file_systemd_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *SystemdStopRequest) GetUnitName() string {
+	if x != nil {
+		return x.UnitName
+	}
+	return ""
+}
+
+func (x *SystemdStopRequest) GetMode() string {
+	if x != nil {
+		return x.Mode
+	}
+	return ""
 }
 
 type SystemdStopResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
+
+	Result string `protobuf:"bytes,1,opt,name=result,proto3" json:"result,omitempty"`
+	JobID  int64  `protobuf:"varint,2,opt,name=jobID,proto3" json:"jobID,omitempty"`
 }
 
 func (x *SystemdStopResponse) Reset() {
 	*x = SystemdStopResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_systemd_proto_msgTypes[17]
+		mi := &file_systemd_proto_msgTypes[16]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -697,7 +940,7 @@ func (x *SystemdStopResponse) String() string {
 func (*SystemdStopResponse) ProtoMessage() {}
 
 func (x *SystemdStopResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_systemd_proto_msgTypes[17]
+	mi := &file_systemd_proto_msgTypes[16]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -710,19 +953,256 @@ func (x *SystemdStopResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SystemdStopResponse.ProtoReflect.Descriptor instead.
 func (*SystemdStopResponse) Descriptor() ([]byte, []int) {
+	return file_systemd_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *SystemdStopResponse) GetResult() string {
+	if x != nil {
+		return x.Result
+	}
+	return ""
+}
+
+func (x *SystemdStopResponse) GetJobID() int64 {
+	if x != nil {
+		return x.JobID
+	}
+	return 0
+}
+
+type SystemdRestartRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	UnitName string `protobuf:"bytes,1,opt,name=unitName,proto3" json:"unitName,omitempty"`
+	Mode     string `protobuf:"bytes,2,opt,name=mode,proto3" json:"mode,omitempty"`
+}
+
+func (x *SystemdRestartRequest) Reset() {
+	*x = SystemdRestartRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_systemd_proto_msgTypes[17]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *SystemdRestartRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SystemdRestartRequest) ProtoMessage() {}
+
+func (x *SystemdRestartRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_systemd_proto_msgTypes[17]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SystemdRestartRequest.ProtoReflect.Descriptor instead.
+func (*SystemdRestartRequest) Descriptor() ([]byte, []int) {
 	return file_systemd_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *SystemdRestartRequest) GetUnitName() string {
+	if x != nil {
+		return x.UnitName
+	}
+	return ""
+}
+
+func (x *SystemdRestartRequest) GetMode() string {
+	if x != nil {
+		return x.Mode
+	}
+	return ""
+}
+
+type SystemdRestartResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Result string `protobuf:"bytes,1,opt,name=result,proto3" json:"result,omitempty"`
+	JobID  int64  `protobuf:"varint,2,opt,name=jobID,proto3" json:"jobID,omitempty"`
+}
+
+func (x *SystemdRestartResponse) Reset() {
+	*x = SystemdRestartResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_systemd_proto_msgTypes[18]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *SystemdRestartResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SystemdRestartResponse) ProtoMessage() {}
+
+func (x *SystemdRestartResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_systemd_proto_msgTypes[18]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SystemdRestartResponse.ProtoReflect.Descriptor instead.
+func (*SystemdRestartResponse) Descriptor() ([]byte, []int) {
+	return file_systemd_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *SystemdRestartResponse) GetResult() string {
+	if x != nil {
+		return x.Result
+	}
+	return ""
+}
+
+func (x *SystemdRestartResponse) GetJobID() int64 {
+	if x != nil {
+		return x.JobID
+	}
+	return 0
+}
+
+type SystemdReloadRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	UnitName string `protobuf:"bytes,1,opt,name=unitName,proto3" json:"unitName,omitempty"`
+	Mode     string `protobuf:"bytes,2,opt,name=mode,proto3" json:"mode,omitempty"`
+}
+
+func (x *SystemdReloadRequest) Reset() {
+	*x = SystemdReloadRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_systemd_proto_msgTypes[19]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *SystemdReloadRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SystemdReloadRequest) ProtoMessage() {}
+
+func (x *SystemdReloadRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_systemd_proto_msgTypes[19]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SystemdReloadRequest.ProtoReflect.Descriptor instead.
+func (*SystemdReloadRequest) Descriptor() ([]byte, []int) {
+	return file_systemd_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *SystemdReloadRequest) GetUnitName() string {
+	if x != nil {
+		return x.UnitName
+	}
+	return ""
+}
+
+func (x *SystemdReloadRequest) GetMode() string {
+	if x != nil {
+		return x.Mode
+	}
+	return ""
+}
+
+type SystemdReloadResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Result string `protobuf:"bytes,1,opt,name=result,proto3" json:"result,omitempty"`
+	JobID  int64  `protobuf:"varint,2,opt,name=jobID,proto3" json:"jobID,omitempty"`
+}
+
+func (x *SystemdReloadResponse) Reset() {
+	*x = SystemdReloadResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_systemd_proto_msgTypes[20]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *SystemdReloadResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SystemdReloadResponse) ProtoMessage() {}
+
+func (x *SystemdReloadResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_systemd_proto_msgTypes[20]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SystemdReloadResponse.ProtoReflect.Descriptor instead.
+func (*SystemdReloadResponse) Descriptor() ([]byte, []int) {
+	return file_systemd_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *SystemdReloadResponse) GetResult() string {
+	if x != nil {
+		return x.Result
+	}
+	return ""
+}
+
+func (x *SystemdReloadResponse) GetJobID() int64 {
+	if x != nil {
+		return x.JobID
+	}
+	return 0
 }
 
 type SystemdKillRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
+
+	UnitName string `protobuf:"bytes,1,opt,name=unitName,proto3" json:"unitName,omitempty"`
+	Signal   int32  `protobuf:"varint,2,opt,name=signal,proto3" json:"signal,omitempty"`
 }
 
 func (x *SystemdKillRequest) Reset() {
 	*x = SystemdKillRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_systemd_proto_msgTypes[18]
+		mi := &file_systemd_proto_msgTypes[21]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -735,7 +1215,7 @@ func (x *SystemdKillRequest) String() string {
 func (*SystemdKillRequest) ProtoMessage() {}
 
 func (x *SystemdKillRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_systemd_proto_msgTypes[18]
+	mi := &file_systemd_proto_msgTypes[21]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -748,7 +1228,21 @@ func (x *SystemdKillRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SystemdKillRequest.ProtoReflect.Descriptor instead.
 func (*SystemdKillRequest) Descriptor() ([]byte, []int) {
-	return file_systemd_proto_rawDescGZIP(), []int{18}
+	return file_systemd_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *SystemdKillRequest) GetUnitName() string {
+	if x != nil {
+		return x.UnitName
+	}
+	return ""
+}
+
+func (x *SystemdKillRequest) GetSignal() int32 {
+	if x != nil {
+		return x.Signal
+	}
+	return 0
 }
 
 type SystemdKillResponse struct {
@@ -760,7 +1254,7 @@ type SystemdKillResponse struct {
 func (x *SystemdKillResponse) Reset() {
 	*x = SystemdKillResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_systemd_proto_msgTypes[19]
+		mi := &file_systemd_proto_msgTypes[22]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -773,7 +1267,7 @@ func (x *SystemdKillResponse) String() string {
 func (*SystemdKillResponse) ProtoMessage() {}
 
 func (x *SystemdKillResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_systemd_proto_msgTypes[19]
+	mi := &file_systemd_proto_msgTypes[22]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -786,97 +1280,179 @@ func (x *SystemdKillResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SystemdKillResponse.ProtoReflect.Descriptor instead.
 func (*SystemdKillResponse) Descriptor() ([]byte, []int) {
-	return file_systemd_proto_rawDescGZIP(), []int{19}
+	return file_systemd_proto_rawDescGZIP(), []int{22}
 }
 
 var File_systemd_proto protoreflect.FileDescriptor
 
 var file_systemd_proto_rawDesc = []byte{
 	0x0a, 0x0d, 0x73, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12,
-	0x08, 0x65, 0x78, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x22, 0x19, 0x0a, 0x17, 0x53, 0x79, 0x73,
-	0x74, 0x65, 0x6d, 0x64, 0x4c, 0x69, 0x73, 0x74, 0x55, 0x6e, 0x69, 0x74, 0x73, 0x52, 0x65, 0x71,
-	0x75, 0x65, 0x73, 0x74, 0x22, 0x1a, 0x0a, 0x18, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x4c,
-	0x69, 0x73, 0x74, 0x55, 0x6e, 0x69, 0x74, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
-	0x22, 0x16, 0x0a, 0x14, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x53, 0x74, 0x61, 0x74, 0x75,
-	0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x17, 0x0a, 0x15, 0x53, 0x79, 0x73, 0x74,
-	0x65, 0x6d, 0x64, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
-	0x65, 0x22, 0x1a, 0x0a, 0x18, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x4c, 0x69, 0x73, 0x74,
-	0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x1b, 0x0a,
-	0x19, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x4c, 0x69, 0x73, 0x74, 0x53, 0x74, 0x61, 0x74,
-	0x75, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x16, 0x0a, 0x14, 0x53, 0x79,
-	0x73, 0x74, 0x65, 0x6d, 0x64, 0x45, 0x6e, 0x61, 0x62, 0x6c, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65,
-	0x73, 0x74, 0x22, 0x17, 0x0a, 0x15, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x45, 0x6e, 0x61,
-	0x62, 0x6c, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x17, 0x0a, 0x15, 0x53,
-	0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x44, 0x69, 0x73, 0x61, 0x62, 0x6c, 0x65, 0x52, 0x65, 0x71,
-	0x75, 0x65, 0x73, 0x74, 0x22, 0x18, 0x0a, 0x16, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x44,
-	0x69, 0x73, 0x61, 0x62, 0x6c, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x15,
-	0x0a, 0x13, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x53, 0x74, 0x61, 0x72, 0x74, 0x52, 0x65,
-	0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x16, 0x0a, 0x14, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64,
-	0x53, 0x74, 0x61, 0x72, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x17, 0x0a,
-	0x15, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x52, 0x65, 0x73, 0x74, 0x61, 0x72, 0x74, 0x52,
-	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x18, 0x0a, 0x16, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d,
-	0x64, 0x52, 0x65, 0x73, 0x74, 0x61, 0x72, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
-	0x22, 0x16, 0x0a, 0x14, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x52, 0x65, 0x6c, 0x6f, 0x61,
-	0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x17, 0x0a, 0x15, 0x53, 0x79, 0x73, 0x74,
-	0x65, 0x6d, 0x64, 0x52, 0x65, 0x6c, 0x6f, 0x61, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
-	0x65, 0x22, 0x14, 0x0a, 0x12, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x53, 0x74, 0x6f, 0x70,
-	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x15, 0x0a, 0x13, 0x53, 0x79, 0x73, 0x74, 0x65,
-	0x6d, 0x64, 0x53, 0x74, 0x6f, 0x70, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x14,
-	0x0a, 0x12, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x4b, 0x69, 0x6c, 0x6c, 0x52, 0x65, 0x71,
-	0x75, 0x65, 0x73, 0x74, 0x22, 0x15, 0x0a, 0x13, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x4b,
-	0x69, 0x6c, 0x6c, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x32, 0x83, 0x06, 0x0a, 0x07,
-	0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x12, 0x52, 0x0a, 0x09, 0x4c, 0x69, 0x73, 0x74, 0x55,
-	0x6e, 0x69, 0x74, 0x73, 0x12, 0x21, 0x2e, 0x65, 0x78, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2e,
+	0x08, 0x65, 0x78, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x22, 0x32, 0x0a, 0x08, 0x55, 0x6e, 0x69,
+	0x74, 0x46, 0x69, 0x6c, 0x65, 0x12, 0x12, 0x0a, 0x04, 0x70, 0x61, 0x74, 0x68, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x04, 0x70, 0x61, 0x74, 0x68, 0x12, 0x12, 0x0a, 0x04, 0x74, 0x79, 0x70,
+	0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x74, 0x79, 0x70, 0x65, 0x22, 0x98, 0x02,
+	0x0a, 0x0a, 0x55, 0x6e, 0x69, 0x74, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x12, 0x12, 0x0a, 0x04,
+	0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65,
+	0x12, 0x20, 0x0a, 0x0b, 0x64, 0x65, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x18,
+	0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x64, 0x65, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69,
+	0x6f, 0x6e, 0x12, 0x1c, 0x0a, 0x09, 0x6c, 0x6f, 0x61, 0x64, 0x53, 0x74, 0x61, 0x74, 0x65, 0x18,
+	0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x6c, 0x6f, 0x61, 0x64, 0x53, 0x74, 0x61, 0x74, 0x65,
+	0x12, 0x20, 0x0a, 0x0b, 0x61, 0x63, 0x74, 0x69, 0x76, 0x65, 0x53, 0x74, 0x61, 0x74, 0x65, 0x18,
+	0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x61, 0x63, 0x74, 0x69, 0x76, 0x65, 0x53, 0x74, 0x61,
+	0x74, 0x65, 0x12, 0x1a, 0x0a, 0x08, 0x73, 0x75, 0x62, 0x53, 0x74, 0x61, 0x74, 0x65, 0x18, 0x05,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x73, 0x75, 0x62, 0x53, 0x74, 0x61, 0x74, 0x65, 0x12, 0x1a,
+	0x0a, 0x08, 0x66, 0x6f, 0x6c, 0x6c, 0x6f, 0x77, 0x65, 0x64, 0x18, 0x06, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x08, 0x66, 0x6f, 0x6c, 0x6c, 0x6f, 0x77, 0x65, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x70, 0x61,
+	0x74, 0x68, 0x18, 0x07, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x70, 0x61, 0x74, 0x68, 0x12, 0x14,
+	0x0a, 0x05, 0x6a, 0x6f, 0x62, 0x49, 0x64, 0x18, 0x08, 0x20, 0x01, 0x28, 0x05, 0x52, 0x05, 0x6a,
+	0x6f, 0x62, 0x49, 0x64, 0x12, 0x18, 0x0a, 0x07, 0x6a, 0x6f, 0x62, 0x54, 0x79, 0x70, 0x65, 0x18,
+	0x09, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x6a, 0x6f, 0x62, 0x54, 0x79, 0x70, 0x65, 0x12, 0x18,
+	0x0a, 0x07, 0x6a, 0x6f, 0x62, 0x50, 0x61, 0x74, 0x68, 0x18, 0x0a, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x07, 0x6a, 0x6f, 0x62, 0x50, 0x61, 0x74, 0x68, 0x22, 0x62, 0x0a, 0x0e, 0x55, 0x6e, 0x69, 0x74,
+	0x46, 0x69, 0x6c, 0x65, 0x43, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x12, 0x12, 0x0a, 0x04, 0x74, 0x79,
+	0x70, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x74, 0x79, 0x70, 0x65, 0x12, 0x1a,
+	0x0a, 0x08, 0x66, 0x69, 0x6c, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x08, 0x66, 0x69, 0x6c, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x20, 0x0a, 0x0b, 0x64, 0x65,
+	0x73, 0x74, 0x69, 0x6e, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x0b, 0x64, 0x65, 0x73, 0x74, 0x69, 0x6e, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x22, 0x19, 0x0a, 0x17,
 	0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x4c, 0x69, 0x73, 0x74, 0x55, 0x6e, 0x69, 0x74, 0x73,
-	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x22, 0x2e, 0x65, 0x78, 0x74, 0x65, 0x72, 0x6e,
-	0x61, 0x6c, 0x2e, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x4c, 0x69, 0x73, 0x74, 0x55, 0x6e,
-	0x69, 0x74, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x49, 0x0a, 0x06, 0x53,
-	0x74, 0x61, 0x74, 0x75, 0x73, 0x12, 0x1e, 0x2e, 0x65, 0x78, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c,
-	0x2e, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x65,
-	0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1f, 0x2e, 0x65, 0x78, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c,
-	0x2e, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x65,
-	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x55, 0x0a, 0x0a, 0x4c, 0x69, 0x73, 0x74, 0x53, 0x74,
-	0x61, 0x74, 0x75, 0x73, 0x12, 0x22, 0x2e, 0x65, 0x78, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2e,
-	0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x4c, 0x69, 0x73, 0x74, 0x53, 0x74, 0x61, 0x74, 0x75,
-	0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x23, 0x2e, 0x65, 0x78, 0x74, 0x65, 0x72,
-	0x6e, 0x61, 0x6c, 0x2e, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x4c, 0x69, 0x73, 0x74, 0x53,
-	0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x49, 0x0a,
-	0x06, 0x45, 0x6e, 0x61, 0x62, 0x6c, 0x65, 0x12, 0x1e, 0x2e, 0x65, 0x78, 0x74, 0x65, 0x72, 0x6e,
-	0x61, 0x6c, 0x2e, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x45, 0x6e, 0x61, 0x62, 0x6c, 0x65,
-	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1f, 0x2e, 0x65, 0x78, 0x74, 0x65, 0x72, 0x6e,
-	0x61, 0x6c, 0x2e, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x45, 0x6e, 0x61, 0x62, 0x6c, 0x65,
-	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x4c, 0x0a, 0x07, 0x44, 0x69, 0x73, 0x61,
-	0x62, 0x6c, 0x65, 0x12, 0x1f, 0x2e, 0x65, 0x78, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2e, 0x53,
-	0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x44, 0x69, 0x73, 0x61, 0x62, 0x6c, 0x65, 0x52, 0x65, 0x71,
-	0x75, 0x65, 0x73, 0x74, 0x1a, 0x20, 0x2e, 0x65, 0x78, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2e,
-	0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x44, 0x69, 0x73, 0x61, 0x62, 0x6c, 0x65, 0x52, 0x65,
-	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x46, 0x0a, 0x05, 0x53, 0x74, 0x61, 0x72, 0x74, 0x12,
-	0x1d, 0x2e, 0x65, 0x78, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2e, 0x53, 0x79, 0x73, 0x74, 0x65,
-	0x6d, 0x64, 0x53, 0x74, 0x61, 0x72, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1e,
-	0x2e, 0x65, 0x78, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2e, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d,
-	0x64, 0x53, 0x74, 0x61, 0x72, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x4c,
-	0x0a, 0x07, 0x52, 0x65, 0x73, 0x74, 0x61, 0x72, 0x74, 0x12, 0x1f, 0x2e, 0x65, 0x78, 0x74, 0x65,
-	0x72, 0x6e, 0x61, 0x6c, 0x2e, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x52, 0x65, 0x73, 0x74,
-	0x61, 0x72, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x20, 0x2e, 0x65, 0x78, 0x74,
-	0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2e, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x52, 0x65, 0x73,
-	0x74, 0x61, 0x72, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x49, 0x0a, 0x06,
-	0x52, 0x65, 0x6c, 0x6f, 0x61, 0x64, 0x12, 0x1e, 0x2e, 0x65, 0x78, 0x74, 0x65, 0x72, 0x6e, 0x61,
-	0x6c, 0x2e, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x52, 0x65, 0x6c, 0x6f, 0x61, 0x64, 0x52,
-	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1f, 0x2e, 0x65, 0x78, 0x74, 0x65, 0x72, 0x6e, 0x61,
-	0x6c, 0x2e, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x52, 0x65, 0x6c, 0x6f, 0x61, 0x64, 0x52,
-	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x43, 0x0a, 0x04, 0x53, 0x74, 0x6f, 0x70, 0x12,
-	0x1c, 0x2e, 0x65, 0x78, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2e, 0x53, 0x79, 0x73, 0x74, 0x65,
-	0x6d, 0x64, 0x53, 0x74, 0x6f, 0x70, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1d, 0x2e,
+	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x44, 0x0a, 0x18, 0x53, 0x79, 0x73, 0x74, 0x65,
+	0x6d, 0x64, 0x4c, 0x69, 0x73, 0x74, 0x55, 0x6e, 0x69, 0x74, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f,
+	0x6e, 0x73, 0x65, 0x12, 0x28, 0x0a, 0x05, 0x75, 0x6e, 0x69, 0x74, 0x73, 0x18, 0x01, 0x20, 0x03,
+	0x28, 0x0b, 0x32, 0x12, 0x2e, 0x65, 0x78, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2e, 0x55, 0x6e,
+	0x69, 0x74, 0x46, 0x69, 0x6c, 0x65, 0x52, 0x05, 0x75, 0x6e, 0x69, 0x74, 0x73, 0x22, 0x32, 0x0a,
+	0x14, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x65,
+	0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1a, 0x0a, 0x08, 0x75, 0x6e, 0x69, 0x74, 0x4e, 0x61, 0x6d,
+	0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x75, 0x6e, 0x69, 0x74, 0x4e, 0x61, 0x6d,
+	0x65, 0x22, 0x45, 0x0a, 0x15, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x53, 0x74, 0x61, 0x74,
+	0x75, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x2c, 0x0a, 0x06, 0x73, 0x74,
+	0x61, 0x74, 0x75, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x14, 0x2e, 0x65, 0x78, 0x74,
+	0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2e, 0x55, 0x6e, 0x69, 0x74, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73,
+	0x52, 0x06, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x22, 0x1a, 0x0a, 0x18, 0x53, 0x79, 0x73, 0x74,
+	0x65, 0x6d, 0x64, 0x4c, 0x69, 0x73, 0x74, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x65, 0x71,
+	0x75, 0x65, 0x73, 0x74, 0x22, 0x4d, 0x0a, 0x19, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x4c,
+	0x69, 0x73, 0x74, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
+	0x65, 0x12, 0x30, 0x0a, 0x08, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x65, 0x73, 0x18, 0x01, 0x20,
+	0x03, 0x28, 0x0b, 0x32, 0x14, 0x2e, 0x65, 0x78, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2e, 0x55,
+	0x6e, 0x69, 0x74, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x08, 0x73, 0x74, 0x61, 0x74, 0x75,
+	0x73, 0x65, 0x73, 0x22, 0x62, 0x0a, 0x14, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x45, 0x6e,
+	0x61, 0x62, 0x6c, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1a, 0x0a, 0x08, 0x75,
+	0x6e, 0x69, 0x74, 0x4e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x75,
+	0x6e, 0x69, 0x74, 0x4e, 0x61, 0x6d, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x72, 0x75, 0x6e, 0x74, 0x69,
+	0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x08, 0x52, 0x07, 0x72, 0x75, 0x6e, 0x74, 0x69, 0x6d,
+	0x65, 0x12, 0x14, 0x0a, 0x05, 0x66, 0x6f, 0x72, 0x63, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x08,
+	0x52, 0x05, 0x66, 0x6f, 0x72, 0x63, 0x65, 0x22, 0x71, 0x0a, 0x15, 0x53, 0x79, 0x73, 0x74, 0x65,
+	0x6d, 0x64, 0x45, 0x6e, 0x61, 0x62, 0x6c, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
+	0x12, 0x24, 0x0a, 0x0d, 0x68, 0x61, 0x64, 0x45, 0x6e, 0x61, 0x62, 0x6c, 0x65, 0x6d, 0x65, 0x6e,
+	0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x08, 0x52, 0x0d, 0x68, 0x61, 0x64, 0x45, 0x6e, 0x61, 0x62,
+	0x6c, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x12, 0x32, 0x0a, 0x07, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65,
+	0x73, 0x18, 0x02, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x18, 0x2e, 0x65, 0x78, 0x74, 0x65, 0x72, 0x6e,
+	0x61, 0x6c, 0x2e, 0x55, 0x6e, 0x69, 0x74, 0x46, 0x69, 0x6c, 0x65, 0x43, 0x68, 0x61, 0x6e, 0x67,
+	0x65, 0x52, 0x07, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x73, 0x22, 0x4d, 0x0a, 0x15, 0x53, 0x79,
+	0x73, 0x74, 0x65, 0x6d, 0x64, 0x44, 0x69, 0x73, 0x61, 0x62, 0x6c, 0x65, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x12, 0x1a, 0x0a, 0x08, 0x75, 0x6e, 0x69, 0x74, 0x4e, 0x61, 0x6d, 0x65, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x75, 0x6e, 0x69, 0x74, 0x4e, 0x61, 0x6d, 0x65, 0x12,
+	0x18, 0x0a, 0x07, 0x72, 0x75, 0x6e, 0x74, 0x69, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x08,
+	0x52, 0x07, 0x72, 0x75, 0x6e, 0x74, 0x69, 0x6d, 0x65, 0x22, 0x4c, 0x0a, 0x16, 0x53, 0x79, 0x73,
+	0x74, 0x65, 0x6d, 0x64, 0x44, 0x69, 0x73, 0x61, 0x62, 0x6c, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f,
+	0x6e, 0x73, 0x65, 0x12, 0x32, 0x0a, 0x07, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x73, 0x18, 0x01,
+	0x20, 0x03, 0x28, 0x0b, 0x32, 0x18, 0x2e, 0x65, 0x78, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2e,
+	0x55, 0x6e, 0x69, 0x74, 0x46, 0x69, 0x6c, 0x65, 0x43, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x52, 0x07,
+	0x63, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x73, 0x22, 0x45, 0x0a, 0x13, 0x53, 0x79, 0x73, 0x74, 0x65,
+	0x6d, 0x64, 0x53, 0x74, 0x61, 0x72, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1a,
+	0x0a, 0x08, 0x75, 0x6e, 0x69, 0x74, 0x4e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x08, 0x75, 0x6e, 0x69, 0x74, 0x4e, 0x61, 0x6d, 0x65, 0x12, 0x12, 0x0a, 0x04, 0x6d, 0x6f,
+	0x64, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6d, 0x6f, 0x64, 0x65, 0x22, 0x44,
+	0x0a, 0x14, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x53, 0x74, 0x61, 0x72, 0x74, 0x52, 0x65,
+	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x16, 0x0a, 0x06, 0x72, 0x65, 0x73, 0x75, 0x6c, 0x74,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x72, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x12, 0x14,
+	0x0a, 0x05, 0x6a, 0x6f, 0x62, 0x49, 0x44, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x05, 0x6a,
+	0x6f, 0x62, 0x49, 0x44, 0x22, 0x44, 0x0a, 0x12, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x53,
+	0x74, 0x6f, 0x70, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1a, 0x0a, 0x08, 0x75, 0x6e,
+	0x69, 0x74, 0x4e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x75, 0x6e,
+	0x69, 0x74, 0x4e, 0x61, 0x6d, 0x65, 0x12, 0x12, 0x0a, 0x04, 0x6d, 0x6f, 0x64, 0x65, 0x18, 0x02,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6d, 0x6f, 0x64, 0x65, 0x22, 0x43, 0x0a, 0x13, 0x53, 0x79,
+	0x73, 0x74, 0x65, 0x6d, 0x64, 0x53, 0x74, 0x6f, 0x70, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
+	0x65, 0x12, 0x16, 0x0a, 0x06, 0x72, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x06, 0x72, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x12, 0x14, 0x0a, 0x05, 0x6a, 0x6f, 0x62,
+	0x49, 0x44, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x05, 0x6a, 0x6f, 0x62, 0x49, 0x44, 0x22,
+	0x47, 0x0a, 0x15, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x52, 0x65, 0x73, 0x74, 0x61, 0x72,
+	0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1a, 0x0a, 0x08, 0x75, 0x6e, 0x69, 0x74,
+	0x4e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x75, 0x6e, 0x69, 0x74,
+	0x4e, 0x61, 0x6d, 0x65, 0x12, 0x12, 0x0a, 0x04, 0x6d, 0x6f, 0x64, 0x65, 0x18, 0x02, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x04, 0x6d, 0x6f, 0x64, 0x65, 0x22, 0x46, 0x0a, 0x16, 0x53, 0x79, 0x73, 0x74,
+	0x65, 0x6d, 0x64, 0x52, 0x65, 0x73, 0x74, 0x61, 0x72, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
+	0x73, 0x65, 0x12, 0x16, 0x0a, 0x06, 0x72, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x06, 0x72, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x12, 0x14, 0x0a, 0x05, 0x6a, 0x6f,
+	0x62, 0x49, 0x44, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x05, 0x6a, 0x6f, 0x62, 0x49, 0x44,
+	0x22, 0x46, 0x0a, 0x14, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x52, 0x65, 0x6c, 0x6f, 0x61,
+	0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1a, 0x0a, 0x08, 0x75, 0x6e, 0x69, 0x74,
+	0x4e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x75, 0x6e, 0x69, 0x74,
+	0x4e, 0x61, 0x6d, 0x65, 0x12, 0x12, 0x0a, 0x04, 0x6d, 0x6f, 0x64, 0x65, 0x18, 0x02, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x04, 0x6d, 0x6f, 0x64, 0x65, 0x22, 0x45, 0x0a, 0x15, 0x53, 0x79, 0x73, 0x74,
+	0x65, 0x6d, 0x64, 0x52, 0x65, 0x6c, 0x6f, 0x61, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
+	0x65, 0x12, 0x16, 0x0a, 0x06, 0x72, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x06, 0x72, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x12, 0x14, 0x0a, 0x05, 0x6a, 0x6f, 0x62,
+	0x49, 0x44, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x05, 0x6a, 0x6f, 0x62, 0x49, 0x44, 0x22,
+	0x48, 0x0a, 0x12, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x4b, 0x69, 0x6c, 0x6c, 0x52, 0x65,
+	0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1a, 0x0a, 0x08, 0x75, 0x6e, 0x69, 0x74, 0x4e, 0x61, 0x6d,
+	0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x75, 0x6e, 0x69, 0x74, 0x4e, 0x61, 0x6d,
+	0x65, 0x12, 0x16, 0x0a, 0x06, 0x73, 0x69, 0x67, 0x6e, 0x61, 0x6c, 0x18, 0x02, 0x20, 0x01, 0x28,
+	0x05, 0x52, 0x06, 0x73, 0x69, 0x67, 0x6e, 0x61, 0x6c, 0x22, 0x15, 0x0a, 0x13, 0x53, 0x79, 0x73,
+	0x74, 0x65, 0x6d, 0x64, 0x4b, 0x69, 0x6c, 0x6c, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
+	0x32, 0x83, 0x06, 0x0a, 0x07, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x12, 0x52, 0x0a, 0x09,
+	0x4c, 0x69, 0x73, 0x74, 0x55, 0x6e, 0x69, 0x74, 0x73, 0x12, 0x21, 0x2e, 0x65, 0x78, 0x74, 0x65,
+	0x72, 0x6e, 0x61, 0x6c, 0x2e, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x4c, 0x69, 0x73, 0x74,
+	0x55, 0x6e, 0x69, 0x74, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x22, 0x2e, 0x65,
+	0x78, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2e, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x4c,
+	0x69, 0x73, 0x74, 0x55, 0x6e, 0x69, 0x74, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
+	0x12, 0x49, 0x0a, 0x06, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x12, 0x1e, 0x2e, 0x65, 0x78, 0x74,
+	0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2e, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x53, 0x74, 0x61,
+	0x74, 0x75, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1f, 0x2e, 0x65, 0x78, 0x74,
+	0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2e, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x53, 0x74, 0x61,
+	0x74, 0x75, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x55, 0x0a, 0x0a, 0x4c,
+	0x69, 0x73, 0x74, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x12, 0x22, 0x2e, 0x65, 0x78, 0x74, 0x65,
+	0x72, 0x6e, 0x61, 0x6c, 0x2e, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x4c, 0x69, 0x73, 0x74,
+	0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x23, 0x2e,
 	0x65, 0x78, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2e, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64,
-	0x53, 0x74, 0x6f, 0x70, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x43, 0x0a, 0x04,
-	0x4b, 0x69, 0x6c, 0x6c, 0x12, 0x1c, 0x2e, 0x65, 0x78, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2e,
-	0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x4b, 0x69, 0x6c, 0x6c, 0x52, 0x65, 0x71, 0x75, 0x65,
-	0x73, 0x74, 0x1a, 0x1d, 0x2e, 0x65, 0x78, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2e, 0x53, 0x79,
-	0x73, 0x74, 0x65, 0x6d, 0x64, 0x4b, 0x69, 0x6c, 0x6c, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
-	0x65, 0x42, 0x33, 0x5a, 0x31, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f,
-	0x64, 0x65, 0x76, 0x6f, 0x64, 0x65, 0x76, 0x2f, 0x67, 0x72, 0x70, 0x63, 0x2d, 0x64, 0x65, 0x6d,
-	0x6f, 0x2f, 0x69, 0x6e, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2f, 0x70, 0x62, 0x2f, 0x65, 0x78,
-	0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x4c, 0x69, 0x73, 0x74, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
+	0x73, 0x65, 0x12, 0x49, 0x0a, 0x06, 0x45, 0x6e, 0x61, 0x62, 0x6c, 0x65, 0x12, 0x1e, 0x2e, 0x65,
+	0x78, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2e, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x45,
+	0x6e, 0x61, 0x62, 0x6c, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1f, 0x2e, 0x65,
+	0x78, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2e, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x45,
+	0x6e, 0x61, 0x62, 0x6c, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x4c, 0x0a,
+	0x07, 0x44, 0x69, 0x73, 0x61, 0x62, 0x6c, 0x65, 0x12, 0x1f, 0x2e, 0x65, 0x78, 0x74, 0x65, 0x72,
+	0x6e, 0x61, 0x6c, 0x2e, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x44, 0x69, 0x73, 0x61, 0x62,
+	0x6c, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x20, 0x2e, 0x65, 0x78, 0x74, 0x65,
+	0x72, 0x6e, 0x61, 0x6c, 0x2e, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x44, 0x69, 0x73, 0x61,
+	0x62, 0x6c, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x46, 0x0a, 0x05, 0x53,
+	0x74, 0x61, 0x72, 0x74, 0x12, 0x1d, 0x2e, 0x65, 0x78, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2e,
+	0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x53, 0x74, 0x61, 0x72, 0x74, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x1a, 0x1e, 0x2e, 0x65, 0x78, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2e, 0x53,
+	0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x53, 0x74, 0x61, 0x72, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f,
+	0x6e, 0x73, 0x65, 0x12, 0x43, 0x0a, 0x04, 0x53, 0x74, 0x6f, 0x70, 0x12, 0x1c, 0x2e, 0x65, 0x78,
+	0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2e, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x53, 0x74,
+	0x6f, 0x70, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1d, 0x2e, 0x65, 0x78, 0x74, 0x65,
+	0x72, 0x6e, 0x61, 0x6c, 0x2e, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x53, 0x74, 0x6f, 0x70,
+	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x4c, 0x0a, 0x07, 0x52, 0x65, 0x73, 0x74,
+	0x61, 0x72, 0x74, 0x12, 0x1f, 0x2e, 0x65, 0x78, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2e, 0x53,
+	0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x52, 0x65, 0x73, 0x74, 0x61, 0x72, 0x74, 0x52, 0x65, 0x71,
+	0x75, 0x65, 0x73, 0x74, 0x1a, 0x20, 0x2e, 0x65, 0x78, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2e,
+	0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x52, 0x65, 0x73, 0x74, 0x61, 0x72, 0x74, 0x52, 0x65,
+	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x49, 0x0a, 0x06, 0x52, 0x65, 0x6c, 0x6f, 0x61, 0x64,
+	0x12, 0x1e, 0x2e, 0x65, 0x78, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2e, 0x53, 0x79, 0x73, 0x74,
+	0x65, 0x6d, 0x64, 0x52, 0x65, 0x6c, 0x6f, 0x61, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x1a, 0x1f, 0x2e, 0x65, 0x78, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2e, 0x53, 0x79, 0x73, 0x74,
+	0x65, 0x6d, 0x64, 0x52, 0x65, 0x6c, 0x6f, 0x61, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
+	0x65, 0x12, 0x43, 0x0a, 0x04, 0x4b, 0x69, 0x6c, 0x6c, 0x12, 0x1c, 0x2e, 0x65, 0x78, 0x74, 0x65,
+	0x72, 0x6e, 0x61, 0x6c, 0x2e, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x4b, 0x69, 0x6c, 0x6c,
+	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1d, 0x2e, 0x65, 0x78, 0x74, 0x65, 0x72, 0x6e,
+	0x61, 0x6c, 0x2e, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x64, 0x4b, 0x69, 0x6c, 0x6c, 0x52, 0x65,
+	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x33, 0x5a, 0x31, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62,
+	0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x64, 0x65, 0x76, 0x6f, 0x64, 0x65, 0x76, 0x2f, 0x67, 0x72, 0x70,
+	0x63, 0x2d, 0x64, 0x65, 0x6d, 0x6f, 0x2f, 0x69, 0x6e, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2f,
+	0x70, 0x62, 0x2f, 0x65, 0x78, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x62, 0x06, 0x70, 0x72, 0x6f,
+	0x74, 0x6f, 0x33,
 }
 
 var (
@@ -891,55 +1467,63 @@ func file_systemd_proto_rawDescGZIP() []byte {
 	return file_systemd_proto_rawDescData
 }
 
-var file_systemd_proto_msgTypes = make([]protoimpl.MessageInfo, 20)
+var file_systemd_proto_msgTypes = make([]protoimpl.MessageInfo, 23)
 var file_systemd_proto_goTypes = []interface{}{
-	(*SystemdListUnitsRequest)(nil),   // 0: external.SystemdListUnitsRequest
-	(*SystemdListUnitsResponse)(nil),  // 1: external.SystemdListUnitsResponse
-	(*SystemdStatusRequest)(nil),      // 2: external.SystemdStatusRequest
-	(*SystemdStatusResponse)(nil),     // 3: external.SystemdStatusResponse
-	(*SystemdListStatusRequest)(nil),  // 4: external.SystemdListStatusRequest
-	(*SystemdListStatusResponse)(nil), // 5: external.SystemdListStatusResponse
-	(*SystemdEnableRequest)(nil),      // 6: external.SystemdEnableRequest
-	(*SystemdEnableResponse)(nil),     // 7: external.SystemdEnableResponse
-	(*SystemdDisableRequest)(nil),     // 8: external.SystemdDisableRequest
-	(*SystemdDisableResponse)(nil),    // 9: external.SystemdDisableResponse
-	(*SystemdStartRequest)(nil),       // 10: external.SystemdStartRequest
-	(*SystemdStartResponse)(nil),      // 11: external.SystemdStartResponse
-	(*SystemdRestartRequest)(nil),     // 12: external.SystemdRestartRequest
-	(*SystemdRestartResponse)(nil),    // 13: external.SystemdRestartResponse
-	(*SystemdReloadRequest)(nil),      // 14: external.SystemdReloadRequest
-	(*SystemdReloadResponse)(nil),     // 15: external.SystemdReloadResponse
-	(*SystemdStopRequest)(nil),        // 16: external.SystemdStopRequest
-	(*SystemdStopResponse)(nil),       // 17: external.SystemdStopResponse
-	(*SystemdKillRequest)(nil),        // 18: external.SystemdKillRequest
-	(*SystemdKillResponse)(nil),       // 19: external.SystemdKillResponse
+	(*UnitFile)(nil),                  // 0: external.UnitFile
+	(*UnitStatus)(nil),                // 1: external.UnitStatus
+	(*UnitFileChange)(nil),            // 2: external.UnitFileChange
+	(*SystemdListUnitsRequest)(nil),   // 3: external.SystemdListUnitsRequest
+	(*SystemdListUnitsResponse)(nil),  // 4: external.SystemdListUnitsResponse
+	(*SystemdStatusRequest)(nil),      // 5: external.SystemdStatusRequest
+	(*SystemdStatusResponse)(nil),     // 6: external.SystemdStatusResponse
+	(*SystemdListStatusRequest)(nil),  // 7: external.SystemdListStatusRequest
+	(*SystemdListStatusResponse)(nil), // 8: external.SystemdListStatusResponse
+	(*SystemdEnableRequest)(nil),      // 9: external.SystemdEnableRequest
+	(*SystemdEnableResponse)(nil),     // 10: external.SystemdEnableResponse
+	(*SystemdDisableRequest)(nil),     // 11: external.SystemdDisableRequest
+	(*SystemdDisableResponse)(nil),    // 12: external.SystemdDisableResponse
+	(*SystemdStartRequest)(nil),       // 13: external.SystemdStartRequest
+	(*SystemdStartResponse)(nil),      // 14: external.SystemdStartResponse
+	(*SystemdStopRequest)(nil),        // 15: external.SystemdStopRequest
+	(*SystemdStopResponse)(nil),       // 16: external.SystemdStopResponse
+	(*SystemdRestartRequest)(nil),     // 17: external.SystemdRestartRequest
+	(*SystemdRestartResponse)(nil),    // 18: external.SystemdRestartResponse
+	(*SystemdReloadRequest)(nil),      // 19: external.SystemdReloadRequest
+	(*SystemdReloadResponse)(nil),     // 20: external.SystemdReloadResponse
+	(*SystemdKillRequest)(nil),        // 21: external.SystemdKillRequest
+	(*SystemdKillResponse)(nil),       // 22: external.SystemdKillResponse
 }
 var file_systemd_proto_depIdxs = []int32{
-	0,  // 0: external.Systemd.ListUnits:input_type -> external.SystemdListUnitsRequest
-	2,  // 1: external.Systemd.Status:input_type -> external.SystemdStatusRequest
-	4,  // 2: external.Systemd.ListStatus:input_type -> external.SystemdListStatusRequest
-	6,  // 3: external.Systemd.Enable:input_type -> external.SystemdEnableRequest
-	8,  // 4: external.Systemd.Disable:input_type -> external.SystemdDisableRequest
-	10, // 5: external.Systemd.Start:input_type -> external.SystemdStartRequest
-	12, // 6: external.Systemd.Restart:input_type -> external.SystemdRestartRequest
-	14, // 7: external.Systemd.Reload:input_type -> external.SystemdReloadRequest
-	16, // 8: external.Systemd.Stop:input_type -> external.SystemdStopRequest
-	18, // 9: external.Systemd.Kill:input_type -> external.SystemdKillRequest
-	1,  // 10: external.Systemd.ListUnits:output_type -> external.SystemdListUnitsResponse
-	3,  // 11: external.Systemd.Status:output_type -> external.SystemdStatusResponse
-	5,  // 12: external.Systemd.ListStatus:output_type -> external.SystemdListStatusResponse
-	7,  // 13: external.Systemd.Enable:output_type -> external.SystemdEnableResponse
-	9,  // 14: external.Systemd.Disable:output_type -> external.SystemdDisableResponse
-	11, // 15: external.Systemd.Start:output_type -> external.SystemdStartResponse
-	13, // 16: external.Systemd.Restart:output_type -> external.SystemdRestartResponse
-	15, // 17: external.Systemd.Reload:output_type -> external.SystemdReloadResponse
-	17, // 18: external.Systemd.Stop:output_type -> external.SystemdStopResponse
-	19, // 19: external.Systemd.Kill:output_type -> external.SystemdKillResponse
-	10, // [10:20] is the sub-list for method output_type
-	0,  // [0:10] is the sub-list for method input_type
-	0,  // [0:0] is the sub-list for extension type_name
-	0,  // [0:0] is the sub-list for extension extendee
-	0,  // [0:0] is the sub-list for field type_name
+	0,  // 0: external.SystemdListUnitsResponse.units:type_name -> external.UnitFile
+	1,  // 1: external.SystemdStatusResponse.status:type_name -> external.UnitStatus
+	1,  // 2: external.SystemdListStatusResponse.statuses:type_name -> external.UnitStatus
+	2,  // 3: external.SystemdEnableResponse.changes:type_name -> external.UnitFileChange
+	2,  // 4: external.SystemdDisableResponse.changes:type_name -> external.UnitFileChange
+	3,  // 5: external.Systemd.ListUnits:input_type -> external.SystemdListUnitsRequest
+	5,  // 6: external.Systemd.Status:input_type -> external.SystemdStatusRequest
+	7,  // 7: external.Systemd.ListStatus:input_type -> external.SystemdListStatusRequest
+	9,  // 8: external.Systemd.Enable:input_type -> external.SystemdEnableRequest
+	11, // 9: external.Systemd.Disable:input_type -> external.SystemdDisableRequest
+	13, // 10: external.Systemd.Start:input_type -> external.SystemdStartRequest
+	15, // 11: external.Systemd.Stop:input_type -> external.SystemdStopRequest
+	17, // 12: external.Systemd.Restart:input_type -> external.SystemdRestartRequest
+	19, // 13: external.Systemd.Reload:input_type -> external.SystemdReloadRequest
+	21, // 14: external.Systemd.Kill:input_type -> external.SystemdKillRequest
+	4,  // 15: external.Systemd.ListUnits:output_type -> external.SystemdListUnitsResponse
+	6,  // 16: external.Systemd.Status:output_type -> external.SystemdStatusResponse
+	8,  // 17: external.Systemd.ListStatus:output_type -> external.SystemdListStatusResponse
+	10, // 18: external.Systemd.Enable:output_type -> external.SystemdEnableResponse
+	12, // 19: external.Systemd.Disable:output_type -> external.SystemdDisableResponse
+	14, // 20: external.Systemd.Start:output_type -> external.SystemdStartResponse
+	16, // 21: external.Systemd.Stop:output_type -> external.SystemdStopResponse
+	18, // 22: external.Systemd.Restart:output_type -> external.SystemdRestartResponse
+	20, // 23: external.Systemd.Reload:output_type -> external.SystemdReloadResponse
+	22, // 24: external.Systemd.Kill:output_type -> external.SystemdKillResponse
+	15, // [15:25] is the sub-list for method output_type
+	5,  // [5:15] is the sub-list for method input_type
+	5,  // [5:5] is the sub-list for extension type_name
+	5,  // [5:5] is the sub-list for extension extendee
+	0,  // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_systemd_proto_init() }
@@ -949,7 +1533,7 @@ func file_systemd_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_systemd_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SystemdListUnitsRequest); i {
+			switch v := v.(*UnitFile); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -961,7 +1545,7 @@ func file_systemd_proto_init() {
 			}
 		}
 		file_systemd_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SystemdListUnitsResponse); i {
+			switch v := v.(*UnitStatus); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -973,7 +1557,7 @@ func file_systemd_proto_init() {
 			}
 		}
 		file_systemd_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SystemdStatusRequest); i {
+			switch v := v.(*UnitFileChange); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -985,7 +1569,7 @@ func file_systemd_proto_init() {
 			}
 		}
 		file_systemd_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SystemdStatusResponse); i {
+			switch v := v.(*SystemdListUnitsRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -997,7 +1581,7 @@ func file_systemd_proto_init() {
 			}
 		}
 		file_systemd_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SystemdListStatusRequest); i {
+			switch v := v.(*SystemdListUnitsResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1009,7 +1593,7 @@ func file_systemd_proto_init() {
 			}
 		}
 		file_systemd_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SystemdListStatusResponse); i {
+			switch v := v.(*SystemdStatusRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1021,7 +1605,7 @@ func file_systemd_proto_init() {
 			}
 		}
 		file_systemd_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SystemdEnableRequest); i {
+			switch v := v.(*SystemdStatusResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1033,7 +1617,7 @@ func file_systemd_proto_init() {
 			}
 		}
 		file_systemd_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SystemdEnableResponse); i {
+			switch v := v.(*SystemdListStatusRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1045,7 +1629,7 @@ func file_systemd_proto_init() {
 			}
 		}
 		file_systemd_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SystemdDisableRequest); i {
+			switch v := v.(*SystemdListStatusResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1057,7 +1641,7 @@ func file_systemd_proto_init() {
 			}
 		}
 		file_systemd_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SystemdDisableResponse); i {
+			switch v := v.(*SystemdEnableRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1069,7 +1653,7 @@ func file_systemd_proto_init() {
 			}
 		}
 		file_systemd_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SystemdStartRequest); i {
+			switch v := v.(*SystemdEnableResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1081,7 +1665,7 @@ func file_systemd_proto_init() {
 			}
 		}
 		file_systemd_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SystemdStartResponse); i {
+			switch v := v.(*SystemdDisableRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1093,7 +1677,7 @@ func file_systemd_proto_init() {
 			}
 		}
 		file_systemd_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SystemdRestartRequest); i {
+			switch v := v.(*SystemdDisableResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1105,7 +1689,7 @@ func file_systemd_proto_init() {
 			}
 		}
 		file_systemd_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SystemdRestartResponse); i {
+			switch v := v.(*SystemdStartRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1117,7 +1701,7 @@ func file_systemd_proto_init() {
 			}
 		}
 		file_systemd_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SystemdReloadRequest); i {
+			switch v := v.(*SystemdStartResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1129,18 +1713,6 @@ func file_systemd_proto_init() {
 			}
 		}
 		file_systemd_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SystemdReloadResponse); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_systemd_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*SystemdStopRequest); i {
 			case 0:
 				return &v.state
@@ -1152,7 +1724,7 @@ func file_systemd_proto_init() {
 				return nil
 			}
 		}
-		file_systemd_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
+		file_systemd_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*SystemdStopResponse); i {
 			case 0:
 				return &v.state
@@ -1164,8 +1736,20 @@ func file_systemd_proto_init() {
 				return nil
 			}
 		}
+		file_systemd_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*SystemdRestartRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 		file_systemd_proto_msgTypes[18].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SystemdKillRequest); i {
+			switch v := v.(*SystemdRestartResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1177,6 +1761,42 @@ func file_systemd_proto_init() {
 			}
 		}
 		file_systemd_proto_msgTypes[19].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*SystemdReloadRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_systemd_proto_msgTypes[20].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*SystemdReloadResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_systemd_proto_msgTypes[21].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*SystemdKillRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_systemd_proto_msgTypes[22].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*SystemdKillResponse); i {
 			case 0:
 				return &v.state
@@ -1195,7 +1815,7 @@ func file_systemd_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_systemd_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   20,
+			NumMessages:   23,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
@@ -1227,9 +1847,9 @@ type SystemdClient interface {
 	Enable(ctx context.Context, in *SystemdEnableRequest, opts ...grpc.CallOption) (*SystemdEnableResponse, error)
 	Disable(ctx context.Context, in *SystemdDisableRequest, opts ...grpc.CallOption) (*SystemdDisableResponse, error)
 	Start(ctx context.Context, in *SystemdStartRequest, opts ...grpc.CallOption) (*SystemdStartResponse, error)
+	Stop(ctx context.Context, in *SystemdStopRequest, opts ...grpc.CallOption) (*SystemdStopResponse, error)
 	Restart(ctx context.Context, in *SystemdRestartRequest, opts ...grpc.CallOption) (*SystemdRestartResponse, error)
 	Reload(ctx context.Context, in *SystemdReloadRequest, opts ...grpc.CallOption) (*SystemdReloadResponse, error)
-	Stop(ctx context.Context, in *SystemdStopRequest, opts ...grpc.CallOption) (*SystemdStopResponse, error)
 	Kill(ctx context.Context, in *SystemdKillRequest, opts ...grpc.CallOption) (*SystemdKillResponse, error)
 }
 
@@ -1295,6 +1915,15 @@ func (c *systemdClient) Start(ctx context.Context, in *SystemdStartRequest, opts
 	return out, nil
 }
 
+func (c *systemdClient) Stop(ctx context.Context, in *SystemdStopRequest, opts ...grpc.CallOption) (*SystemdStopResponse, error) {
+	out := new(SystemdStopResponse)
+	err := c.cc.Invoke(ctx, "/external.Systemd/Stop", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *systemdClient) Restart(ctx context.Context, in *SystemdRestartRequest, opts ...grpc.CallOption) (*SystemdRestartResponse, error) {
 	out := new(SystemdRestartResponse)
 	err := c.cc.Invoke(ctx, "/external.Systemd/Restart", in, out, opts...)
@@ -1307,15 +1936,6 @@ func (c *systemdClient) Restart(ctx context.Context, in *SystemdRestartRequest, 
 func (c *systemdClient) Reload(ctx context.Context, in *SystemdReloadRequest, opts ...grpc.CallOption) (*SystemdReloadResponse, error) {
 	out := new(SystemdReloadResponse)
 	err := c.cc.Invoke(ctx, "/external.Systemd/Reload", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *systemdClient) Stop(ctx context.Context, in *SystemdStopRequest, opts ...grpc.CallOption) (*SystemdStopResponse, error) {
-	out := new(SystemdStopResponse)
-	err := c.cc.Invoke(ctx, "/external.Systemd/Stop", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1339,9 +1959,9 @@ type SystemdServer interface {
 	Enable(context.Context, *SystemdEnableRequest) (*SystemdEnableResponse, error)
 	Disable(context.Context, *SystemdDisableRequest) (*SystemdDisableResponse, error)
 	Start(context.Context, *SystemdStartRequest) (*SystemdStartResponse, error)
+	Stop(context.Context, *SystemdStopRequest) (*SystemdStopResponse, error)
 	Restart(context.Context, *SystemdRestartRequest) (*SystemdRestartResponse, error)
 	Reload(context.Context, *SystemdReloadRequest) (*SystemdReloadResponse, error)
-	Stop(context.Context, *SystemdStopRequest) (*SystemdStopResponse, error)
 	Kill(context.Context, *SystemdKillRequest) (*SystemdKillResponse, error)
 }
 
@@ -1367,14 +1987,14 @@ func (*UnimplementedSystemdServer) Disable(context.Context, *SystemdDisableReque
 func (*UnimplementedSystemdServer) Start(context.Context, *SystemdStartRequest) (*SystemdStartResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Start not implemented")
 }
+func (*UnimplementedSystemdServer) Stop(context.Context, *SystemdStopRequest) (*SystemdStopResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Stop not implemented")
+}
 func (*UnimplementedSystemdServer) Restart(context.Context, *SystemdRestartRequest) (*SystemdRestartResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Restart not implemented")
 }
 func (*UnimplementedSystemdServer) Reload(context.Context, *SystemdReloadRequest) (*SystemdReloadResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Reload not implemented")
-}
-func (*UnimplementedSystemdServer) Stop(context.Context, *SystemdStopRequest) (*SystemdStopResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Stop not implemented")
 }
 func (*UnimplementedSystemdServer) Kill(context.Context, *SystemdKillRequest) (*SystemdKillResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Kill not implemented")
@@ -1492,6 +2112,24 @@ func _Systemd_Start_Handler(srv interface{}, ctx context.Context, dec func(inter
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Systemd_Stop_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SystemdStopRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SystemdServer).Stop(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/external.Systemd/Stop",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SystemdServer).Stop(ctx, req.(*SystemdStopRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Systemd_Restart_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SystemdRestartRequest)
 	if err := dec(in); err != nil {
@@ -1524,24 +2162,6 @@ func _Systemd_Reload_Handler(srv interface{}, ctx context.Context, dec func(inte
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(SystemdServer).Reload(ctx, req.(*SystemdReloadRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Systemd_Stop_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SystemdStopRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(SystemdServer).Stop(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/external.Systemd/Stop",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SystemdServer).Stop(ctx, req.(*SystemdStopRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1593,16 +2213,16 @@ var _Systemd_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Systemd_Start_Handler,
 		},
 		{
+			MethodName: "Stop",
+			Handler:    _Systemd_Stop_Handler,
+		},
+		{
 			MethodName: "Restart",
 			Handler:    _Systemd_Restart_Handler,
 		},
 		{
 			MethodName: "Reload",
 			Handler:    _Systemd_Reload_Handler,
-		},
-		{
-			MethodName: "Stop",
-			Handler:    _Systemd_Stop_Handler,
 		},
 		{
 			MethodName: "Kill",
