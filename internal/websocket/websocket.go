@@ -107,8 +107,6 @@ func (c *RWC) Write(p []byte) (int, error) {
 
 // Read .
 func (c *RWC) Read(p []byte) (int, error) {
-	c.c.SetReadLimit(maxMessageSize)
-	c.c.SetReadDeadline(time.Now().Add(pongWait))
 	for {
 		if c.r == nil {
 			// Advance to next message.
@@ -122,6 +120,7 @@ func (c *RWC) Read(p []byte) (int, error) {
 				return 0, fmt.Errorf("invalid message type received")
 			}
 		}
+		c.c.SetReadDeadline(time.Now().Add(pongWait))
 		n, err := c.r.Read(p)
 		if err == io.EOF {
 			// At end of message.
