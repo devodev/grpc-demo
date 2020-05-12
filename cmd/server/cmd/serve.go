@@ -11,6 +11,7 @@ import (
 
 	"github.com/devodev/grpc-demo/internal/hub"
 	"github.com/devodev/grpc-demo/internal/server/pb/fluentd"
+	"github.com/devodev/grpc-demo/internal/server/pb/systemd"
 )
 
 // Config holds config for the Fluentd command.
@@ -56,6 +57,8 @@ func newCommandServe() *cobra.Command {
 			server := grpc.NewServer()
 			fluentdService := &fluentd.Service{}
 			fluentdService.RegisterServer(server)
+			systemdService := &systemd.Service{}
+			systemdService.RegisterServer(server)
 
 			go func() {
 				defer func() {
