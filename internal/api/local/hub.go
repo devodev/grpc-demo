@@ -6,7 +6,7 @@ import (
 
 	"github.com/devodev/grpc-demo/internal/client"
 	"github.com/devodev/grpc-demo/internal/feed"
-	pb "github.com/devodev/grpc-demo/internal/pb/local"
+	pb "github.com/devodev/grpc-demo/internal/pb/local/hub"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
