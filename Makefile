@@ -17,7 +17,12 @@ pb/remote/fluentd.pb.go: $(PB_LOCATION)/remote/fluentd.proto
 			--go_out=plugins=grpc:$(PB_LOCATION)/remote \
 			--go_opt=paths=source_relative \
 			$(PB_LOCATION)/remote/fluentd.proto
-
+pb/remote/systemd.pb.go: $(PB_LOCATION)/remote/systemd.proto
+	@protoc -I $(PB_LOCATION)/remote \
+			-I ${GOPATH}/src \
+			--go_out=plugins=grpc:$(PB_LOCATION)/remote \
+			--go_opt=paths=source_relative \
+			$(PB_LOCATION)/remote/systemd.proto
 pb/local/hub.pb.go: $(PB_LOCATION)/local/hub.proto
 	@protoc -I $(PB_LOCATION)/local \
 			-I ${GOPATH}/src \
@@ -26,6 +31,7 @@ pb/local/hub.pb.go: $(PB_LOCATION)/local/hub.proto
 			$(PB_LOCATION)/local/hub.proto
 
 pb: pb/remote/fluentd.pb.go \
+	pb/remote/systemd.pb.go \
 	pb/local/hub.pb.go  ## compile protocol buffers
 
 dep: ## Get dependencies

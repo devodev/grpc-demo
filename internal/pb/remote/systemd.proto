@@ -1,0 +1,78 @@
+syntax = "proto3";
+
+option go_package = "github.com/devodev/grpc-demo/internal/pb/external";
+
+package external;
+
+service Systemd {
+    rpc ListUnits (SystemdListUnitsRequest) returns (SystemdListUnitsResponse);
+    rpc Status (SystemdStatusRequest) returns (SystemdStatusResponse);
+    rpc ListStatus (SystemdListStatusRequest) returns (SystemdListStatusResponse);
+    rpc Enable (SystemdEnableRequest) returns (SystemdEnableResponse);
+    rpc Disable (SystemdDisableRequest) returns (SystemdDisableResponse);
+    rpc Start (SystemdStartRequest) returns (SystemdStartResponse);
+    rpc Restart (SystemdRestartRequest) returns (SystemdRestartResponse);
+    rpc Reload (SystemdReloadRequest) returns (SystemdReloadResponse);
+    rpc Stop (SystemdStopRequest) returns (SystemdStopResponse);
+    rpc Kill (SystemdKillRequest) returns (SystemdKillResponse);
+}
+
+message SystemdListUnitsRequest {
+}
+
+message SystemdListUnitsResponse {
+}
+
+message SystemdStatusRequest {
+}
+
+message SystemdStatusResponse {
+}
+
+message SystemdListStatusRequest {
+}
+
+message SystemdListStatusResponse {
+}
+
+message SystemdEnableRequest {
+}
+
+message SystemdEnableResponse {
+}
+
+message SystemdDisableRequest {
+}
+
+message SystemdDisableResponse {
+}
+
+message SystemdStartRequest {
+}
+
+message SystemdStartResponse {
+}
+
+message SystemdRestartRequest {
+}
+
+message SystemdRestartResponse {
+}
+
+message SystemdReloadRequest {
+}
+
+message SystemdReloadResponse {
+}
+
+message SystemdStopRequest {
+}
+
+message SystemdStopResponse {
+}
+
+message SystemdKillRequest {
+}
+
+message SystemdKillResponse {
+}
